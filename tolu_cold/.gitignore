@@ -1,0 +1,9 @@
+# Test binaries (./test/run.sh)
+test/build/
+
+# Arduino / arduino-cli build output
+build/
+
+# Editors and macOS
+.vscode/
+.DS_Store

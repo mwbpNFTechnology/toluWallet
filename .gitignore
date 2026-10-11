@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# Xcode: per-user state and build output
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+
+# tolu_cold test binaries (./tolu_cold/test/run.sh)
+tolu_cold/test/build/

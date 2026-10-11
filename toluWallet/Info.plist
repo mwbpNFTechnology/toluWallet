@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
+	<array>
+		<string>A0000003965453000000010300000000</string>
+		<!-- toluCold: the key-ceremony device's PN532 in card mode, which the
+		     phone selects to hand over a wallet's slots and password.
+		     F0 = proprietary AID, then "toluCOLD" in ASCII. -->
+		<string>F0746F6C75434F4C44</string>
+	</array>
+</dict>
+</plist>
