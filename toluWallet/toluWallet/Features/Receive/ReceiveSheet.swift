@@ -27,11 +27,11 @@ struct ReceiveSheet: View {
 
                     VStack(spacing: 8) {
                         Text("send to this \(Text("wallet").foregroundStyle(Tolu.Palette.lime)).")
-                            .font(.toluTitle(23))
+                            .toluTitle(23)
                             .tracking(-1)
                             .foregroundStyle(Tolu.Palette.text)
                         Text("The same address works on every EVM chain. Check the sender picks a network this wallet lists.")
-                            .font(.system(size: 13.5))
+                            .toluFont(13.5)
                             .foregroundStyle(Tolu.Palette.mute)
                             .multilineTextAlignment(.center)
                             .lineSpacing(3)
@@ -51,13 +51,14 @@ struct ReceiveSheet: View {
             }
             .padding(.horizontal, Tolu.Spacing.screen)
 
-            HStack(spacing: 22) {
+            HStack(spacing: 34) {
                 ShareLink(item: wallet.displayAddress) {
                     Text("Share")
                 }
                 Button("Done") { dismiss() }
             }
-            .font(.system(size: 14, weight: .medium))
+            .buttonStyle(TapTargetStyle())
+            .toluFont(14, weight: .medium)
             .foregroundStyle(Tolu.Palette.mute)
             .padding(.top, 14)
             .padding(.bottom, 20)
@@ -78,7 +79,7 @@ struct ReceiveSheet: View {
             DetailRow(label: "networks", value: "evm · \(ChainRegistry.all.count) chains")
             Rectangle().fill(Tolu.Palette.line).frame(height: 1)
             Text(wallet.displayAddress)
-                .font(.toluMono(11.5))
+                .toluMono(11.5)
                 .foregroundStyle(Tolu.Palette.text)
                 .multilineTextAlignment(.center)
                 .textSelection(.enabled)

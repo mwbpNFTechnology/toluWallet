@@ -104,6 +104,10 @@ struct ColdWalletView: View {
                     }
                     if !model.running {
                         HStack(spacing: 26) {
+                            if model.step == .check {
+                                Button("Scan again") { model.scanAgain() }
+                                    .foregroundStyle(Tolu.Palette.mute)
+                            }
                             if model.step != .send {
                                 Button("Send again") { model.sendAgain() }
                                     .foregroundStyle(Tolu.Palette.mute)
@@ -111,7 +115,7 @@ struct ColdWalletView: View {
                             Button("Cancel", action: cancel)
                                 .foregroundStyle(Tolu.Palette.coral)
                         }
-                        .font(.system(size: 14, weight: .medium))
+                        .toluFont(14, weight: .medium)
                         .frame(minHeight: 44)
                     }
                 }

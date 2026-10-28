@@ -28,7 +28,7 @@ struct MonoLabel: View {
 
     var body: some View {
         Text(text.uppercased())
-            .font(.toluMono(size))
+            .toluMono(size)
             .tracking(tracking)
             .foregroundStyle(color)
     }

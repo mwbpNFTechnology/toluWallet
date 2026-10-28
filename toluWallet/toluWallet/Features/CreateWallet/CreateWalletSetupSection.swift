@@ -24,6 +24,7 @@ struct CreateWalletSetupSection: View {
                 password: $model.password,
                 passwordObjectID: $model.passwordObjectIdText,
                 slotsCollide: model.slotsCollide,
+                slotsLocked: model.hasWrittenToTag,
                 accent: accent
             )
 
@@ -36,18 +37,20 @@ struct CreateWalletSetupSection: View {
                     }
                 }
             }
+            .disabled(model.hasWrittenToTag)
+            .opacity(model.hasWrittenToTag ? 0.5 : 1)
 
             notice
 
             if let error = model.setupError {
                 Text(error)
-                    .font(.system(size: 12))
+                    .toluFont(12)
                     .foregroundStyle(Tolu.Palette.coral)
                     .fixedSize(horizontal: false, vertical: true)
             }
             if !model.isNfcAvailable {
                 Text("nfc isn't available here — run on a real iphone.")
-                    .font(.system(size: 12))
+                    .toluFont(12)
                     .foregroundStyle(Tolu.Palette.amber)
             }
         }
@@ -58,6 +61,18 @@ struct CreateWalletSetupSection: View {
     /// What is worth knowing about the chosen way before going on.
     @ViewBuilder
     private var notice: some View {
+        if model.hasWrittenToTag {
+            NoticeCard(
+                systemImage: "lock",
+                text: "These slots and this password are already on the tag and can't be removed. Only the label can change now — continue to finish this wallet."
+            )
+        } else {
+            originNotice
+        }
+    }
+
+    @ViewBuilder
+    private var originNotice: some View {
         switch model.origin {
         case .tag:
             NoticeCard(

@@ -14,6 +14,7 @@ enum TransferError: LocalizedError {
     case needsGas(fee: String, symbol: String, chain: String)
     case reverted
     case stillPending
+    case nonceUsed(String)
 
     var errorDescription: String? {
         switch self {
@@ -33,6 +34,8 @@ enum TransferError: LocalizedError {
             return "The network included the transaction but it failed. Only the fee was spent."
         case .stillPending:
             return "Still waiting for the network. The transaction was sent — check the explorer, or keep waiting."
+        case .nonceUsed(let nonce):
+            return "Nonce \(nonce) on this wallet is already used, possibly by this transfer. Check the explorer before sending it again."
         }
     }
 }

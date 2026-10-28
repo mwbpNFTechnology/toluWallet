@@ -78,6 +78,16 @@ extension Se05xNfcRunner: NFCTagReaderSessionDelegate {
     }
 
     func tagReaderSession(_ session: NFCTagReaderSession, didDetect tags: [NFCTag]) {
+        // With two tags in range, the wrong one would spend one of its
+        // password attempts on this wallet's password. Wait for just one.
+        guard tags.count < 2 else {
+            session.alertMessage = Se05xError.severalTags.localizedDescription
+            Task {
+                try? await Task.sleep(for: .milliseconds(500))
+                session.restartPolling()
+            }
+            return
+        }
         guard let tag = tags.first else {
             let error = Se05xError.notSupportedTag
             session.invalidate(errorMessage: error.localizedDescription)

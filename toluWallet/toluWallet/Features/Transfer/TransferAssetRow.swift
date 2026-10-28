@@ -25,13 +25,13 @@ struct TransferAssetRow: View {
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     Text(holding.symbol)
-                        .font(.system(size: 14, weight: .medium))
+                        .toluFont(14, weight: .medium)
                         .foregroundStyle(Tolu.Palette.text)
                     MonoLabel("\(holding.chain.name) · chain \(holding.chain.id)", size: 8.5, tracking: 1)
                 }
                 Spacer(minLength: 6)
                 Text(holding.balanceText)
-                    .font(.toluMono(11))
+                    .toluMono(11)
                     .foregroundStyle(isSelected ? Tolu.Palette.lime : Tolu.Palette.dim)
             }
             .padding(.horizontal, 13)

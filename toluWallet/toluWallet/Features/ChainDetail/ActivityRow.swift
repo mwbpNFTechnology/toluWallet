@@ -26,7 +26,7 @@ struct ActivityRow: View {
                 Circle().fill(tint.opacity(0.08))
                     .overlay(Circle().stroke(tint.opacity(0.55), lineWidth: 1))
                 Image(systemName: symbol)
-                    .font(.system(size: 12, weight: .semibold))
+                    .toluFont(12, weight: .semibold)
                     .foregroundStyle(tint)
             }
             .frame(width: 30, height: 30)
@@ -35,7 +35,7 @@ struct ActivityRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(item.title)
-                        .font(.system(size: 14, weight: .medium))
+                        .toluFont(14, weight: .medium)
                         .foregroundStyle(Tolu.Palette.text)
                         .lineLimit(1)
                     if item.failed {
@@ -51,7 +51,7 @@ struct ActivityRow: View {
             VStack(alignment: .trailing, spacing: 3) {
                 if let amountText = item.amountText {
                     Text(sign + amountText)
-                        .font(.toluMono(12.5))
+                        .toluMono(12.5)
                         .foregroundStyle(item.failed ? Tolu.Palette.dim : amountColor)
                         .strikethrough(item.failed)
                         .lineLimit(1)
@@ -59,7 +59,7 @@ struct ActivityRow: View {
                 }
                 if let date = item.date {
                     Text(date, format: .relative(presentation: .named))
-                        .font(.toluMono(8.5))
+                        .toluMono(8.5)
                         .textCase(.uppercase)
                         .foregroundStyle(Tolu.Palette.dim)
                 } else {

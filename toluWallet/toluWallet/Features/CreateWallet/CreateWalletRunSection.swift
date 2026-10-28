@@ -20,14 +20,14 @@ struct CreateWalletRunSection: View {
                 .accessibilityHidden(true)
 
             Text(model.isComplete ? "wallet ready" : "hold the tag to\nthe top of your phone")
-                .font(.toluTitle(26))
+                .toluTitle(26)
                 .tracking(-1)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Tolu.Palette.text)
                 .padding(.top, 10)
 
             Text(subtitle)
-                .font(.system(size: 13.5))
+                .toluFont(13.5)
                 .foregroundStyle(Tolu.Palette.mute)
                 .multilineTextAlignment(.center)
                 .lineSpacing(3)
@@ -51,7 +51,7 @@ struct CreateWalletRunSection: View {
 
             if let error = model.runError {
                 Text(error)
-                    .font(.system(size: 12.5))
+                    .toluFont(12.5)
                     .foregroundStyle(Tolu.Palette.coral)
                     .multilineTextAlignment(.center)
                     .padding(.top, 12)

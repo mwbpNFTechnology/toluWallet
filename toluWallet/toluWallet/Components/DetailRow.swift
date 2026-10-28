@@ -17,7 +17,7 @@ struct DetailRow: View {
             MonoLabel(label, size: 8.5, color: Tolu.Palette.dim, tracking: 1.2)
             Rectangle().fill(Tolu.Palette.line).frame(height: 1)
             Text(value)
-                .font(.toluMono(11))
+                .toluMono(11)
                 .foregroundStyle(valueColor)
                 .lineLimit(1)
         }

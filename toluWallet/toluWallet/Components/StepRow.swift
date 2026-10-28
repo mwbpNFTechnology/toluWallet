@@ -39,7 +39,7 @@ struct StepRow: View {
             indicator
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 14, weight: .medium))
+                    .toluFont(14, weight: .medium)
                     .foregroundStyle(state == .pending ? Tolu.Palette.dim : Tolu.Palette.text)
                 MonoLabel(hint, size: 8.5, color: state == .active ? Tolu.Palette.amber : Tolu.Palette.dim, tracking: 0.9)
             }
@@ -69,11 +69,11 @@ struct StepRow: View {
                 .frame(width: 18, height: 18)
             switch state {
             case .done:
-                Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)).foregroundStyle(Tolu.Palette.ink)
+                Image(systemName: "checkmark").toluFont(9, weight: .bold).foregroundStyle(Tolu.Palette.ink)
             case .active:
                 Circle().fill(Tolu.Palette.amber).frame(width: 6, height: 6).opacity(blink ? 0.3 : 1)
             case .error:
-                Image(systemName: "xmark").font(.system(size: 9, weight: .bold)).foregroundStyle(Tolu.Palette.coral)
+                Image(systemName: "xmark").toluFont(9, weight: .bold).foregroundStyle(Tolu.Palette.coral)
             case .pending:
                 EmptyView()
             }

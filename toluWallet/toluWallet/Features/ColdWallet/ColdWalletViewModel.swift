@@ -178,6 +178,18 @@ final class ColdWalletViewModel {
         step = .send
     }
 
+    /// Back to the scan step, with the scanner open: the QR that was read
+    /// wasn't the one the device ended on. The device and the card are left
+    /// as they are.
+    func scanAgain() {
+        guard !running else { return }
+        scannedAddress = nil
+        failedStep = nil
+        runError = nil
+        step = .scan
+        showScanner = true
+    }
+
     /// True once a setup was sent to the device and is still remembered here
     /// — the point from which there is something to cancel.
     var hasSentSetup: Bool { store.coldDraft != nil }

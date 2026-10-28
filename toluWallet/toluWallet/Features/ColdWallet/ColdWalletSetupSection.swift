@@ -18,7 +18,7 @@ struct ColdWalletSetupSection: View {
             VStack(alignment: .leading, spacing: 10) {
                 ToluHeading(text: "the key is made\noff this phone", accent: accent)
                 Text("A toluCold device makes the seed phrase from a random number generated inside the card's secure element, shows it to you once, and writes the key to the card. This phone only sends where the key goes and the password that guards it.")
-                    .font(.system(size: 13))
+                    .toluFont(13)
                     .foregroundStyle(Tolu.Palette.mute)
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
@@ -41,12 +41,12 @@ struct ColdWalletSetupSection: View {
 
             if let error = model.setupError {
                 Text(error)
-                    .font(.system(size: 12))
+                    .toluFont(12)
                     .foregroundStyle(Tolu.Palette.coral)
             }
             if !model.isNfcAvailable {
                 Text("nfc isn't available here — run on a real iphone.")
-                    .font(.system(size: 12))
+                    .toluFont(12)
                     .foregroundStyle(Tolu.Palette.amber)
             }
         }

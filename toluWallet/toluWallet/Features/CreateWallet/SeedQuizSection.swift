@@ -21,7 +21,7 @@ struct SeedQuizSection: View {
                               color: Tolu.Palette.violet, tracking: 1.8)
                     ToluHeading(text: "which one is\nword \(quiz.position + 1)", accent: accent)
                     Text("Read it from your paper, not from memory of the screen.")
-                        .font(.system(size: 13))
+                        .toluFont(13)
                         .foregroundStyle(Tolu.Palette.mute)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
@@ -33,7 +33,7 @@ struct SeedQuizSection: View {
                             model.answerQuiz(choice)
                         } label: {
                             Text(choice)
-                                .font(.system(size: 17, weight: .medium))
+                                .toluFont(17, weight: .medium)
                                 .foregroundStyle(Tolu.Palette.text)
                                 .frame(maxWidth: .infinity, minHeight: 54)
                                 .toluCard(radius: Tolu.Radius.control, fill: Tolu.Palette.ink3)
@@ -50,14 +50,14 @@ struct SeedQuizSection: View {
                 HStack(spacing: 10) {
                     ProgressView().tint(accent)
                     Text("working out the key from your words…")
-                        .font(.system(size: 13))
+                        .toluFont(13)
                         .foregroundStyle(Tolu.Palette.mute)
                 }
             } else {
                 Button("Show the words again", systemImage: "arrow.uturn.backward") {
                     model.backToWords()
                 }
-                .font(.system(size: 14, weight: .medium))
+                .toluFont(14, weight: .medium)
                 .foregroundStyle(accent)
                 .frame(minHeight: 44)
             }

@@ -18,19 +18,19 @@ struct WalletCard: View {
                     RoundedRectangle(cornerRadius: Tolu.Radius.control, style: .continuous)
                         .fill(Tolu.Palette.lime.opacity(0.1))
                     Image(systemName: "wallet.bifold")
-                        .font(.system(size: 20, weight: .medium))
+                        .toluFont(20, weight: .medium)
                         .foregroundStyle(Tolu.Palette.lime)
                 }
                 .frame(width: 48, height: 48)
 
                 VStack(alignment: .leading, spacing: 5) {
                     Text(wallet.label)
-                        .font(.toluTitle(18))
+                        .toluTitle(18)
                         .tracking(-0.4)
                         .foregroundStyle(Tolu.Palette.text)
                         .lineLimit(1)
                     Text(EthereumAddress.short(wallet.displayAddress))
-                        .font(.toluMono(11))
+                        .toluMono(11)
                         .foregroundStyle(Tolu.Palette.mute)
                     MonoLabel("slot 0x\(wallet.keyObjectID)", size: 8.5, tracking: 1.2)
                 }
@@ -38,7 +38,7 @@ struct WalletCard: View {
                 Spacer(minLength: 8)
 
                 Image(systemName: "arrow.up.right")
-                    .font(.system(size: 14, weight: .semibold))
+                    .toluFont(14, weight: .semibold)
                     .foregroundStyle(Tolu.Palette.dim)
             }
             .padding(16)

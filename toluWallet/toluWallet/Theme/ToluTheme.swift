@@ -47,13 +47,14 @@ enum Tolu {
     }
 }
 
+/// Fixed-size faces, for marks drawn inside fixed shapes (the wordmark, coin
+/// badges). Text uses the `toluTitle` / `toluMono` view modifiers in
+/// `ToluFont.swift`, which follow Dynamic Type.
 extension Font {
-    /// Tight sans heading (SF Pro stands in for Inter Tight).
     static func toluTitle(_ size: CGFloat, weight: Font.Weight = .medium) -> Font {
         .system(size: size, weight: weight)
     }
 
-    /// Monospaced label (SF Mono stands in for JetBrains Mono).
     static func toluMono(_ size: CGFloat, weight: Font.Weight = .medium) -> Font {
         .system(size: size, weight: weight, design: .monospaced)
     }

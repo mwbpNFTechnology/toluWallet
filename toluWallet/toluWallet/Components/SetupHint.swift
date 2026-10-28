@@ -16,7 +16,7 @@ struct SetupHint: View {
 
     var body: some View {
         Text(text)
-            .font(.toluMono(9))
+            .toluMono(9)
             .foregroundStyle(Tolu.Palette.dim)
             .lineSpacing(2)
             .fixedSize(horizontal: false, vertical: true)

@@ -15,7 +15,7 @@ struct AddressBar: View {
     var body: some View {
         HStack(spacing: 8) {
             Text(address)
-                .font(.toluMono(11.5))
+                .toluMono(11.5)
                 .foregroundStyle(Tolu.Palette.mute)
                 .lineLimit(1)
                 .truncationMode(.middle)
@@ -25,9 +25,9 @@ struct AddressBar: View {
                 copied = true
             }
             .labelStyle(.iconOnly)
-            .font(.system(size: 11, weight: .medium))
+            .toluFont(11, weight: .medium)
             .foregroundStyle(copied ? Tolu.Palette.lime : Tolu.Palette.mute)
-            .buttonStyle(.plain)
+            .buttonStyle(TapTargetStyle())
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 7)

@@ -15,7 +15,7 @@ struct ToluHeading: View {
 
     var body: some View {
         Text("\(Text(text).foregroundStyle(Tolu.Palette.text))\(Text(".").foregroundStyle(accent))")
-            .font(.toluTitle(size))
+            .toluTitle(size)
             .tracking(-0.5)
             .lineSpacing(2)
     }

@@ -17,7 +17,7 @@ struct InfoRow: View {
         VStack(alignment: .leading, spacing: 4) {
             MonoLabel(label, size: 9, color: Tolu.Palette.dim, tracking: 1.6)
             Text(value)
-                .font(.toluMono(12))
+                .toluMono(12)
                 .foregroundStyle(valueColor)
                 .textSelection(.enabled)
                 .lineLimit(2)

@@ -38,7 +38,7 @@ struct PasswordField: View {
                         SecureField("password", text: $text)
                     }
                 }
-                .font(.toluMono(15))
+                .toluMono(15)
                 .foregroundStyle(Tolu.Palette.text)
                 .tint(accent)
                 .textInputAutocapitalization(.never)
@@ -50,9 +50,9 @@ struct PasswordField: View {
                     isVisible.toggle()
                 }
                 .labelStyle(.iconOnly)
-                .font(.system(size: 15))
+                .toluFont(15)
                 .foregroundStyle(Tolu.Palette.mute)
-                .buttonStyle(.plain)
+                .buttonStyle(TapTargetStyle())
             }
             .padding(14)
             .toluCard(fill: Tolu.Palette.ink3)

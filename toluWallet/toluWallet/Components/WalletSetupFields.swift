@@ -15,6 +15,8 @@ struct WalletSetupFields: View {
     @Binding var passwordObjectID: String
     /// True when the two slots hold the same id.
     let slotsCollide: Bool
+    /// True once the slots and password are on the tag: only the label can change.
+    var slotsLocked = false
     var accent: Color = Tolu.Palette.lime
 
     var body: some View {
@@ -23,23 +25,27 @@ struct WalletSetupFields: View {
                 ToluTextField(label: "label", text: $label, placeholder: "e.g. daily wallet", mono: false)
             }
 
-            field(hint: "the slot on the tag where the secp256k1 key is stored.") {
-                HexBlockField(label: "key object id", text: $keyObjectID, accent: accent)
-            }
+            Group {
+                field(hint: "the slot on the tag where the secp256k1 key is stored.") {
+                    HexBlockField(label: "key object id", text: $keyObjectID, accent: accent)
+                }
 
-            field(hint: "the tag asks for this before every signature. it is saved on this phone behind face id. \(WalletRecord.defaultPasswordAttemptLimit) wrong tries lock the key for good.") {
-                PasswordField(label: "password", text: $password, accent: accent)
-            }
+                field(hint: "the tag asks for this before every signature. it is saved on this phone behind face id. \(WalletRecord.defaultPasswordAttemptLimit) wrong tries lock the key for good.") {
+                    PasswordField(label: "password", text: $password, accent: accent)
+                }
 
-            VStack(alignment: .leading, spacing: 11) {
-                HexBlockField(label: "password object id", text: $passwordObjectID, accent: accent)
-                SetupHint("the slot on the tag that holds the password guarding the key.")
-                if slotsCollide {
-                    Text("the password slot must differ from the key slot.")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Tolu.Palette.coral)
+                VStack(alignment: .leading, spacing: 11) {
+                    HexBlockField(label: "password object id", text: $passwordObjectID, accent: accent)
+                    SetupHint("the slot on the tag that holds the password guarding the key.")
+                    if slotsCollide {
+                        Text("the password slot must differ from the key slot.")
+                            .toluFont(12)
+                            .foregroundStyle(Tolu.Palette.coral)
+                    }
                 }
             }
+            .disabled(slotsLocked)
+            .opacity(slotsLocked ? 0.5 : 1)
         }
     }
 

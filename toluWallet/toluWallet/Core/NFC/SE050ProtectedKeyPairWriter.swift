@@ -172,6 +172,15 @@ extension SE050ProtectedKeyPairWriter: NFCTagReaderSessionDelegate {
     }
 
     func tagReaderSession(_ session: NFCTagReaderSession, didDetect tags: [NFCTag]) {
+        // With two tags in range the write could land on the wrong one.
+        guard tags.count < 2 else {
+            session.alertMessage = Se05xError.severalTags.localizedDescription
+            Task {
+                try? await Task.sleep(for: .milliseconds(500))
+                session.restartPolling()
+            }
+            return
+        }
         guard let tag = tags.first else { fail(session: session, error: .noNFCTag); return }
         session.connect(to: tag) { error in
             if let error = error { self.fail(session: session, error: .connectionError(error)); return }

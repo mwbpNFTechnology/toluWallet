@@ -24,16 +24,23 @@ extension Se05xTag {
     }
 
     /// The uncompressed public key (`0x04 || X || Y`, 65 bytes) of a key pair.
+    /// Only a point on secp256k1 counts: a key on another curve would give an
+    /// address that nothing can sign for.
     func readPublicKeyPoint(objectId: [UInt8]) async throws -> [UInt8] {
         let response = try await execute(cla: Se05x.cla, ins: Se05x.insRead,
                                          p1: Se05x.p1Default, p2: Se05x.p2Default,
                                          data: Tlv.encode(Se05x.tag1, objectId),
                                          operation: "read public key")
+        var foundPoint = false
         var i = 0
         while i + 65 <= response.count {
-            if response[i] == 0x04 { return Array(response[i..<i + 65]) }
+            if response[i] == 0x04 {
+                let point = Array(response[i..<i + 65])
+                if Secp256k1.isOnCurve(point) { return point }
+                foundPoint = true
+            }
             i += 1
         }
-        throw Se05xError.noKey
+        throw foundPoint ? Se05xError.notSecp256k1 : Se05xError.noKey
     }
 }

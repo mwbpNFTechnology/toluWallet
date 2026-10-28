@@ -23,16 +23,19 @@ struct ScreenHeader<Trailing: View>: View {
             HStack {
                 Button("Back", systemImage: backSystemImage, action: onBack)
                     .labelStyle(.iconOnly)
-                    .font(.system(size: 18, weight: .semibold))
+                    .toluFont(18, weight: .semibold)
                     .foregroundStyle(accent)
-                    .frame(width: 32, height: 32)
-                    .contentShape(Rectangle())
+                    .buttonStyle(TapTargetStyle())
+                    .frame(width: 44, height: 44)
                 Spacer()
                 trailing
             }
         }
-        .padding(.horizontal, Tolu.Spacing.screen)
-        .padding(.vertical, 10)
+        // 44 pt controls with the glyphs and the bar height where they were.
+        .padding(.horizontal, Tolu.Spacing.screen - 6)
+        .padding(.vertical, 4)
+        // Like the system bar, it stops growing before the glyphs outgrow their slots.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         .overlay(alignment: .bottom) {
             Rectangle()
                 .fill(Tolu.Palette.line)

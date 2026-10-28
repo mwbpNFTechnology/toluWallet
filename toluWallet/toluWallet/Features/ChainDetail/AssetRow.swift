@@ -16,7 +16,7 @@ struct AssetRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(holding.symbol)
-                    .font(.system(size: 14.5, weight: .medium))
+                    .toluFont(14.5, weight: .medium)
                     .tracking(-0.25)
                     .foregroundStyle(Tolu.Palette.text)
                     .lineLimit(1)
@@ -28,7 +28,7 @@ struct AssetRow: View {
 
             VStack(alignment: .trailing, spacing: 3) {
                 Text(holding.balanceText)
-                    .font(.toluMono(14))
+                    .toluMono(14)
                     .tracking(-0.2)
                     .foregroundStyle(Tolu.Palette.text)
                     .lineLimit(1)

@@ -33,10 +33,10 @@ struct ChoiceCard: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(.system(size: 14, weight: .semibold))
+                        .toluFont(14, weight: .semibold)
                         .foregroundStyle(Tolu.Palette.text)
                     Text(detail)
-                        .font(.toluMono(9))
+                        .toluMono(9)
                         .foregroundStyle(Tolu.Palette.dim)
                         .lineSpacing(2)
                         .multilineTextAlignment(.leading)

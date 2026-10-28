@@ -95,6 +95,14 @@ final class CreateWalletViewModel {
     /// True while a seed phrase is in memory — the time it must not outlive.
     var holdsSeedPhrase: Bool { !words.isEmpty }
 
+    /// This run already put objects on the tag, and they can't be deleted.
+    /// Until the wallet is saved, the slots, password and origin stay as they
+    /// were written; only the label may change.
+    var hasWrittenToTag: Bool {
+        guard !isComplete else { return false }
+        return passwordObjectOnTag || (origin != .existing && currentStep == steps.count - 1)
+    }
+
     var steps: [Step] {
         switch origin {
         case .existing:
@@ -168,14 +176,16 @@ final class CreateWalletViewModel {
             setupError = "password must be \(PasswordField.minLength)–\(PasswordField.maxLength) characters"; return
         }
         setupError = nil
-        resetRun()
+        if !hasWrittenToTag { resetRun() }
         stage = .run
     }
 
-    /// Back to the form. Whatever seed phrase was in memory goes with it.
+    /// Back to the form. Whatever seed phrase was in memory goes with it —
+    /// unless this run already wrote to the tag. Then the run is kept, so the
+    /// next scan carries on instead of finding its own slots taken.
     func backToSetup() {
         stage = .setup
-        resetRun()
+        if !hasWrittenToTag { resetRun() }
     }
 
     // MARK: - Run
@@ -385,7 +395,8 @@ final class CreateWalletViewModel {
     /// screen it was on. Nothing was written to the tag yet, so nothing is lost.
     func seedPhraseExpired() {
         guard holdsSeedPhrase else { return }
-        backToSetup()
+        stage = .setup
+        resetRun()
         setupError = "The seed phrase was on this phone for ten minutes, so it was erased. Start again — you will get new words."
     }
 

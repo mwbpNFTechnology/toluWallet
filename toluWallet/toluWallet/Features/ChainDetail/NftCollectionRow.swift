@@ -17,7 +17,7 @@ struct NftCollectionRow: View {
                     .fill(Tolu.Palette.ink3)
                     .overlay(RoundedRectangle(cornerRadius: 9, style: .continuous).stroke(Tolu.Palette.line2, lineWidth: 1))
                 Image(systemName: "photo")
-                    .font(.system(size: 14))
+                    .toluFont(14)
                     .foregroundStyle(Tolu.Palette.mute)
             }
             .frame(width: 34, height: 34)
@@ -25,7 +25,7 @@ struct NftCollectionRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(collection.name)
-                    .font(.system(size: 14.5, weight: .medium))
+                    .toluFont(14.5, weight: .medium)
                     .tracking(-0.25)
                     .foregroundStyle(Tolu.Palette.text)
                     .lineLimit(1)
@@ -37,7 +37,7 @@ struct NftCollectionRow: View {
 
             VStack(alignment: .trailing, spacing: 3) {
                 Text("\(collection.count)")
-                    .font(.toluMono(14))
+                    .toluMono(14)
                     .foregroundStyle(Tolu.Palette.text)
                 MonoLabel(collection.standard, size: 8.5, tracking: 0.8)
             }

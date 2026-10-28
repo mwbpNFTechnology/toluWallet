@@ -44,8 +44,15 @@ final class TransferController {
     private(set) var nonceText: String?
     private(set) var txHash: String?
 
+    /// Every signed transaction handed to the network, oldest first. They all
+    /// carry `sentNonce`, so at most one of them can ever be mined.
+    private var sentHashes: [String] = []
+
     @ObservationIgnored private var transaction: EvmTransaction?
     @ObservationIgnored private var signedTransaction: [UInt8]?
+    /// Fixed by the first send attempt. A rejected send is rebuilt with the
+    /// same nonce, so it replaces the first one instead of adding to it.
+    @ObservationIgnored private var sentNonce: BigUInt?
     @ObservationIgnored private let runner = Se05xNfcRunner()
     @ObservationIgnored private var task: Task<Void, Never>?
 
@@ -57,8 +64,9 @@ final class TransferController {
 
     var chain: Chain { draft.holding.chain }
 
-    /// Once the transaction is out it can't be edited or taken back.
-    var hasBroadcast: Bool { txHash != nil }
+    /// Once a send was attempted it can't be edited or taken back: the network
+    /// may have it even when the answer never arrived.
+    var hasBroadcast: Bool { !sentHashes.isEmpty }
 
     var amountText: String {
         TokenAmount.exact(amount, decimals: draft.holding.decimals)
@@ -150,6 +158,12 @@ final class TransferController {
                 try Task.checkCancellation()
                 switch current {
                 case .prepare:
+                    // After a rejected send: if the network has an earlier
+                    // attempt after all, follow it instead of signing again.
+                    if await adoptEarlierSend() {
+                        current = .confirm
+                        continue
+                    }
                     try await prepare()
                     current = .sign
                     return
@@ -170,7 +184,9 @@ final class TransferController {
             failedStep = current
             self.error = NfcErrorText.describe(error)
             // A node that rejects the transaction will reject it again, so
-            // start over with a fresh nonce and fee rather than re-sending.
+            // start over with a fresh fee rather than re-sending. The nonce
+            // stays `sentNonce`. A dropped connection (not an RpcError) keeps
+            // the signed bytes, and the retry sends exactly those again.
             if current == .send, error is RpcError {
                 current = .prepare
                 transaction = nil
@@ -190,7 +206,17 @@ final class TransferController {
         async let pendingNonce = EvmRpc.transactionCount(chain, address: wallet.address)
         async let pendingBalance = EvmRpc.nativeBalance(chain, address: wallet.address)
         let fee = try await EvmRpc.suggestedFee(chain)
-        let (nonce, nativeBalance) = try await (pendingNonce, pendingBalance)
+        let (nextNonce, nativeBalance) = try await (pendingNonce, pendingBalance)
+
+        // Once a send was attempted, only a transaction with the same nonce
+        // is safe: a higher one would go out as a second transfer.
+        let nonce: BigUInt
+        if let sentNonce {
+            guard nextNonce <= sentNonce else { throw TransferError.nonceUsed(sentNonce.decimalString) }
+            nonce = sentNonce
+        } else {
+            nonce = nextNonce
+        }
 
         // A native coin goes straight to the recipient; a token is a call to
         // its contract, which carries the recipient and amount as data.
@@ -291,13 +317,36 @@ final class TransferController {
     }
 
     private func broadcast() async throws {
-        guard let signedTransaction else { throw TransferError.notPrepared }
+        guard let transaction, let signedTransaction else { throw TransferError.notPrepared }
+        let hash = "0x" + Hex.string(Keccak256.digest(signedTransaction))
+        sentNonce = transaction.nonce
+        if !sentHashes.contains(hash) { sentHashes.append(hash) }
         do {
             txHash = try await EvmRpc.sendRawTransaction(chain, signed: signedTransaction)
         } catch let error as RpcError where Self.meansAlreadySent(error.message) {
             // A retry after a dropped connection: the first attempt did land.
-            txHash = "0x" + Hex.string(Keccak256.digest(signedTransaction))
+            txHash = hash
+        } catch {
+            // The answer can be lost after the node took it ("nonce too low"
+            // on a retry, a gateway error, a timeout).
+            guard await isKnown(hash) else { throw error }
+            txHash = hash
         }
+    }
+
+    /// Picks up an earlier attempt the network has after all.
+    private func adoptEarlierSend() async -> Bool {
+        for hash in sentHashes.reversed() {
+            if await isKnown(hash) {
+                txHash = hash
+                return true
+            }
+        }
+        return false
+    }
+
+    private func isKnown(_ hash: String) async -> Bool {
+        (try? await EvmRpc.transactionKnown(chain, hash: hash)) == true
     }
 
     private static func meansAlreadySent(_ message: String) -> Bool {
@@ -307,12 +356,16 @@ final class TransferController {
     }
 
     private func confirm() async throws {
-        guard let txHash else { throw TransferError.notPrepared }
+        guard txHash != nil else { throw TransferError.notPrepared }
         // About three minutes; a transient RPC failure just means ask again.
+        // Every attempt shares one nonce, so whichever is mined is the transfer.
         for _ in 0..<60 {
-            if let succeeded = try? await EvmRpc.receiptStatus(chain, hash: txHash) {
-                if succeeded { return }
-                throw TransferError.reverted
+            for hash in sentHashes.reversed() {
+                if let succeeded = try? await EvmRpc.receiptStatus(chain, hash: hash) {
+                    txHash = hash
+                    if succeeded { return }
+                    throw TransferError.reverted
+                }
             }
             try await Task.sleep(for: .seconds(3))
         }

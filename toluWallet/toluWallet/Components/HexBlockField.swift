@@ -38,7 +38,7 @@ struct HexBlockField: View {
 
                 HStack(spacing: 6) {
                     Text("0x")
-                        .font(.toluMono(15))
+                        .toluMono(15)
                         .foregroundStyle(Tolu.Palette.dim)
                     ForEach(0..<8, id: \.self) { index in
                         cell(digit(at: index), cursor: index == text.count && focused)
@@ -49,6 +49,8 @@ struct HexBlockField: View {
             .contentShape(Rectangle())
             .onTapGesture { focused = true }
         }
+        // Eight fixed cells across the screen: larger digits wouldn't fit.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 
     private func badge(_ text: String) -> some View {
@@ -73,7 +75,7 @@ struct HexBlockField: View {
                         .stroke(!digit.isEmpty ? Tolu.Palette.line2 : (cursor ? accent : Tolu.Palette.line), lineWidth: 1)
                 )
             if !digit.isEmpty {
-                Text(digit).font(.toluMono(15)).foregroundStyle(Tolu.Palette.text)
+                Text(digit).toluMono(15).foregroundStyle(Tolu.Palette.text)
             } else if cursor {
                 Rectangle().fill(accent).frame(width: 1.5, height: 18)
             }

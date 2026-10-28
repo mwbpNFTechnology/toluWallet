@@ -35,7 +35,7 @@ struct TransferSignView: View {
                     })
                     if let error = controller.error {
                         Text(error)
-                            .font(.system(size: 13))
+                            .toluFont(13)
                             .foregroundStyle(Tolu.Palette.coral)
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
@@ -43,9 +43,10 @@ struct TransferSignView: View {
                     if let url = controller.explorerURL {
                         Link(destination: url) {
                             Label("View on explorer", systemImage: "arrow.up.right.square")
-                                .font(.system(size: 13, weight: .medium))
+                                .toluFont(13, weight: .medium)
                                 .foregroundStyle(Tolu.Palette.mute)
                         }
+                        .buttonStyle(TapTargetStyle())
                     }
                 }
                 .padding(.horizontal, Tolu.Spacing.screen)
@@ -104,14 +105,14 @@ struct TransferSignView: View {
     private var headline: some View {
         VStack(spacing: 8) {
             Text("\(title)\(Text(".").foregroundStyle(accent))")
-                .font(.toluTitle(24))
+                .toluTitle(24)
                 .tracking(-1)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Tolu.Palette.text)
             Text(controller.isComplete
                  ? "The network confirmed it. The balance updates when you go back."
                  : "The tag signs this asset, this amount, this recipient on this network — and nothing else.")
-                .font(.system(size: 13.5))
+                .toluFont(13.5)
                 .foregroundStyle(Tolu.Palette.mute)
                 .multilineTextAlignment(.center)
                 .lineSpacing(3)
@@ -127,7 +128,7 @@ struct TransferSignView: View {
                         .fill(Tolu.Palette.lime.opacity(0.08))
                         .overlay(RoundedRectangle(cornerRadius: 9, style: .continuous).stroke(Tolu.Palette.lime, lineWidth: 1))
                     Image(systemName: "arrow.up")
-                        .font(.system(size: 13, weight: .semibold))
+                        .toluFont(13, weight: .semibold)
                         .foregroundStyle(Tolu.Palette.lime)
                 }
                 .frame(width: 30, height: 30)
@@ -135,12 +136,12 @@ struct TransferSignView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(controller.amountText) \(controller.draft.holding.symbol)")
-                        .font(.system(size: 15, weight: .medium))
+                        .toluFont(15, weight: .medium)
                         .foregroundStyle(Tolu.Palette.text)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                     Text("out of \(controller.wallet.label)")
-                        .font(.toluMono(9.5))
+                        .toluMono(9.5)
                         .foregroundStyle(Tolu.Palette.dim)
                         .lineLimit(1)
                 }
@@ -154,7 +155,7 @@ struct TransferSignView: View {
             VStack(alignment: .leading, spacing: 4) {
                 MonoLabel("to", size: 8.5, color: Tolu.Palette.dim, tracking: 1.2)
                 Text(EthereumAddress.checksummed(controller.draft.recipient))
-                    .font(.toluMono(11))
+                    .toluMono(11)
                     .foregroundStyle(Tolu.Palette.text)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)

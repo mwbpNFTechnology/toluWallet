@@ -19,7 +19,7 @@ struct ChainBalanceCard: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(chain.name)
-                    .font(.system(size: 14.5, weight: .medium))
+                    .toluFont(14.5, weight: .medium)
                     .tracking(-0.25)
                     .foregroundStyle(Tolu.Palette.text)
                     .lineLimit(1)
@@ -32,7 +32,7 @@ struct ChainBalanceCard: View {
             amounts
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 11, weight: .semibold))
+                .toluFont(11, weight: .semibold)
                 .foregroundStyle(Tolu.Palette.dim)
         }
         .padding(.horizontal, 14)
@@ -65,13 +65,13 @@ struct ChainBalanceCard: View {
                 if chain.priceChain != nil, balance.nativeUsdPrice != nil {
                     // A priced chain leads with its dollar value.
                     Text(UsdFormat.string(balance.usdValue))
-                        .font(.toluMono(14))
+                        .toluMono(14)
                         .tracking(-0.2)
                         .foregroundStyle(balance.isEmpty ? Tolu.Palette.dim : Tolu.Palette.lime)
                     MonoLabel(nativeText, size: 8.5, tracking: 0.8)
                 } else {
                     Text(nativeText)
-                        .font(.toluMono(13))
+                        .toluMono(13)
                         .tracking(-0.2)
                         .foregroundStyle(balance.isEmpty ? Tolu.Palette.dim : Tolu.Palette.text)
                     MonoLabel(chain.isTestnet ? "no value" : "no price", size: 8.5, tracking: 0.8)

@@ -88,7 +88,7 @@ struct ChainDetailView: View {
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(chain.name)
-                        .font(.toluTitle(20))
+                        .toluTitle(20)
                         .tracking(-0.7)
                         .foregroundStyle(Tolu.Palette.text)
                         .lineLimit(1)
@@ -101,7 +101,7 @@ struct ChainDetailView: View {
                 if balance.nativeUsdPrice != nil {
                     VStack(alignment: .trailing, spacing: 2) {
                         Text(UsdFormat.string(balance.usdValue))
-                            .font(.toluMono(18))
+                            .toluMono(18)
                             .tracking(-0.4)
                             .foregroundStyle(Tolu.Palette.text)
                             .lineLimit(1)
@@ -135,10 +135,10 @@ struct ChainDetailView: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: systemImage)
-                    .font(.system(size: 13, weight: .semibold))
+                    .toluFont(13, weight: .semibold)
                     .foregroundStyle(tint)
                 Text(title)
-                    .font(.system(size: 14, weight: .medium))
+                    .toluFont(14, weight: .medium)
                     .tracking(-0.2)
                     .foregroundStyle(Tolu.Palette.text)
             }
@@ -155,7 +155,7 @@ struct ChainDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             ToluHeading(text: "nothing here yet", size: 22)
             Text("This wallet holds no \(chain.symbol), tokens or NFTs on \(chain.name). Send some to its address and they'll show up here.")
-                .font(.system(size: 13))
+                .toluFont(13)
                 .foregroundStyle(Tolu.Palette.mute)
                 .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)
@@ -233,17 +233,18 @@ struct ChainDetailView: View {
         if let url = chain.addressURL(wallet.address) {
             Link(destination: url) {
                 Label("View everything on the explorer", systemImage: "arrow.up.right.square")
-                    .font(.system(size: 13, weight: .medium))
+                    .toluFont(13, weight: .medium)
                     .foregroundStyle(Tolu.Palette.mute)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 6)
             }
+            .buttonStyle(TapTargetStyle())
         }
     }
 
     private func note(_ text: String, color: Color = Tolu.Palette.mute) -> some View {
         Text(text)
-            .font(.system(size: 13))
+            .toluFont(13)
             .foregroundStyle(color)
             .lineSpacing(3)
             .fixedSize(horizontal: false, vertical: true)

@@ -20,14 +20,14 @@ struct ColdWalletDeviceSection: View {
                 .accessibilityHidden(true)
 
             Text(headline)
-                .font(.toluTitle(26))
+                .toluTitle(26)
                 .tracking(-1)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Tolu.Palette.text)
                 .padding(.top, 10)
 
             Text(subtitle)
-                .font(.system(size: 13.5))
+                .toluFont(13.5)
                 .foregroundStyle(Tolu.Palette.mute)
                 .multilineTextAlignment(.center)
                 .lineSpacing(3)
@@ -55,7 +55,7 @@ struct ColdWalletDeviceSection: View {
 
             if let error = model.runError {
                 Text(error)
-                    .font(.system(size: 12.5))
+                    .toluFont(12.5)
                     .foregroundStyle(Tolu.Palette.coral)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
@@ -100,11 +100,11 @@ struct ColdWalletDeviceSection: View {
     private func instruction(_ number: Int, _ text: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             Text("\(number)")
-                .font(.toluMono(11))
+                .toluMono(11)
                 .foregroundStyle(accent)
                 .frame(width: 14, alignment: .leading)
             Text(text)
-                .font(.system(size: 13))
+                .toluFont(13)
                 .foregroundStyle(Tolu.Palette.text)
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)

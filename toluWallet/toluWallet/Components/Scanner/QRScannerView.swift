@@ -39,11 +39,11 @@ struct QRScannerView: View {
                 HStack {
                     Button("Close", systemImage: "xmark") { dismiss() }
                         .labelStyle(.iconOnly)
-                        .font(.system(size: 18))
+                        .toluFont(18)
                         .foregroundStyle(.white)
                         .frame(width: 36, height: 36)
                         .background(.black.opacity(0.5), in: Circle())
-                        .buttonStyle(.plain)
+                        .buttonStyle(TapTargetStyle())
                     Spacer()
                     MonoLabel("◉ \(title)", size: 10, color: Tolu.Palette.lime, tracking: 2)
                     Spacer()
@@ -62,7 +62,7 @@ struct QRScannerView: View {
                 Spacer()
 
                 Text(statusText)
-                    .font(.system(size: 14))
+                    .toluFont(14)
                     .foregroundStyle(statusIsProblem ? Tolu.Palette.coral : .white.opacity(0.85))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)

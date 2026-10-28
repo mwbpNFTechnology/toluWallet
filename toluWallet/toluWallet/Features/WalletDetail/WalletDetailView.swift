@@ -27,15 +27,18 @@ struct WalletDetailView: View {
             ToluBackground()
             VStack(spacing: 0) {
                 ScreenHeader(title: "wallet", onBack: { router.pop() }) {
-                    Menu("Wallet options", systemImage: "ellipsis") {
+                    Menu {
                         Button("Remove from this phone", systemImage: "trash", role: .destructive) {
                             confirmRemove = true
                         }
+                    } label: {
+                        Label("Wallet options", systemImage: "ellipsis")
+                            .labelStyle(.iconOnly)
+                            .frame(width: 44, height: 44)
+                            .contentShape(.rect)
                     }
-                    .labelStyle(.iconOnly)
-                    .font(.system(size: 15, weight: .medium))
+                    .toluFont(15, weight: .medium)
                     .foregroundStyle(Tolu.Palette.mute)
-                    .frame(width: 32, height: 32)
                 }
 
                 ScrollView {
@@ -45,7 +48,7 @@ struct WalletDetailView: View {
 
                         if let errorText {
                             Text(errorText)
-                                .font(.system(size: 12.5))
+                                .toluFont(12.5)
                                 .foregroundStyle(Tolu.Palette.coral)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -104,7 +107,7 @@ struct WalletDetailView: View {
                         .fill(Tolu.Palette.lime.opacity(0.08))
                         .overlay(RoundedRectangle(cornerRadius: 11, style: .continuous).stroke(Tolu.Palette.lime, lineWidth: 1))
                     Image(systemName: "wallet.bifold")
-                        .font(.system(size: 16))
+                        .toluFont(16)
                         .foregroundStyle(Tolu.Palette.lime)
                 }
                 .frame(width: 38, height: 38)
@@ -112,7 +115,7 @@ struct WalletDetailView: View {
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(wallet.label)
-                        .font(.toluTitle(20))
+                        .toluTitle(20)
                         .tracking(-0.7)
                         .foregroundStyle(Tolu.Palette.text)
                         .lineLimit(1)
@@ -122,7 +125,7 @@ struct WalletDetailView: View {
                 if portfolio.totalUsd > 0 {
                     VStack(alignment: .trailing, spacing: 2) {
                         Text(UsdFormat.string(portfolio.totalUsd))
-                            .font(.toluMono(18))
+                            .toluMono(18)
                             .tracking(-0.4)
                             .foregroundStyle(Tolu.Palette.text)
                             .lineLimit(1)
@@ -152,10 +155,10 @@ struct WalletDetailView: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: systemImage)
-                    .font(.system(size: 13, weight: .semibold))
+                    .toluFont(13, weight: .semibold)
                     .foregroundStyle(tint)
                 Text(title)
-                    .font(.system(size: 14, weight: .medium))
+                    .toluFont(14, weight: .medium)
                     .tracking(-0.2)
                     .foregroundStyle(Tolu.Palette.text)
             }

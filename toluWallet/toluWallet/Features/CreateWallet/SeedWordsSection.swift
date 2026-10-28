@@ -25,7 +25,7 @@ struct SeedWordsSection: View {
             VStack(alignment: .leading, spacing: 10) {
                 ToluHeading(text: "write these\n\(model.words.count) words down", accent: accent)
                 Text("In this order, on paper. They are the only backup of this wallet — and anyone who has them has the wallet. They were made from a random number generated inside the tag's secure element, mixed with this phone's own.")
-                    .font(.system(size: 13))
+                    .toluFont(13)
                     .foregroundStyle(Tolu.Palette.mute)
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
@@ -33,7 +33,7 @@ struct SeedWordsSection: View {
 
             if let notice = model.wordsNotice {
                 Text(notice)
-                    .font(.system(size: 12.5))
+                    .toluFont(12.5)
                     .foregroundStyle(Tolu.Palette.coral)
                     .fixedSize(horizontal: false, vertical: true)
             }

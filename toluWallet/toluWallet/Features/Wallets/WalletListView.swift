@@ -65,15 +65,15 @@ struct WalletListView: View {
                 store.lock()
             }
             .labelStyle(.iconOnly)
-            .font(.system(size: 15, weight: .medium))
+            .toluFont(15, weight: .medium)
             .foregroundStyle(Tolu.Palette.mute)
+            .buttonStyle(TapTargetStyle())
             .frame(width: 32, height: 32)
-            .contentShape(Rectangle())
-            .buttonStyle(.plain)
         }
         .padding(.horizontal, Tolu.Spacing.screen)
         .padding(.top, 12)
         .padding(.bottom, 4)
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
     }
 
     private var hero: some View {
@@ -81,7 +81,7 @@ struct WalletListView: View {
             MonoLabel("secp256k1 · keys stay on your tolu tag", color: Tolu.Palette.violet, tracking: 1.8)
             ToluHeading(text: "your wallets")
             Text("each wallet is a key on a tolu tag. the tag signs every transfer; this phone only keeps the slot and its password.")
-                .font(.system(size: 13))
+                .toluFont(13)
                 .foregroundStyle(Tolu.Palette.mute)
                 .lineSpacing(2)
                 .frame(maxWidth: 330, alignment: .leading)
@@ -91,10 +91,10 @@ struct WalletListView: View {
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("No wallets yet")
-                .font(.system(size: 15, weight: .medium))
+                .toluFont(15, weight: .medium)
                 .foregroundStyle(Tolu.Palette.text)
             Text("Create one and tap a tolu tag. The key is made inside the tag, or from a seed phrase you write down, and the address works on every EVM chain.")
-                .font(.system(size: 13))
+                .toluFont(13)
                 .foregroundStyle(Tolu.Palette.mute)
                 .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)
@@ -110,9 +110,9 @@ struct WalletListView: View {
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: systemImage)
-                    .font(.system(size: 12, weight: .semibold))
+                    .toluFont(12, weight: .semibold)
                 Text(title)
-                    .font(.system(size: 14, weight: .medium))
+                    .toluFont(14, weight: .medium)
             }
             .foregroundStyle(tint)
             .frame(maxWidth: .infinity, minHeight: 50)
@@ -137,19 +137,19 @@ struct WalletListView: View {
                     RoundedRectangle(cornerRadius: Tolu.Radius.control, style: .continuous)
                         .fill(Tolu.Palette.violet.opacity(0.1))
                     Image(systemName: "snowflake")
-                        .font(.system(size: 20, weight: .medium))
+                        .toluFont(20, weight: .medium)
                         .foregroundStyle(Tolu.Palette.violet)
                 }
                 .frame(width: 48, height: 48)
 
                 VStack(alignment: .leading, spacing: 5) {
                     Text(draft.label)
-                        .font(.toluTitle(18))
+                        .toluTitle(18)
                         .tracking(-0.4)
                         .foregroundStyle(Tolu.Palette.text)
                         .lineLimit(1)
                     Text("Finish on the cold device, then scan its QR")
-                        .font(.system(size: 12))
+                        .toluFont(12)
                         .foregroundStyle(Tolu.Palette.mute)
                         .multilineTextAlignment(.leading)
                     MonoLabel("slot 0x\(draft.keyObjectID) · not finished", size: 8.5, color: Tolu.Palette.amber, tracking: 1.2)
@@ -158,7 +158,7 @@ struct WalletListView: View {
                 Spacer(minLength: 8)
 
                 Image(systemName: "arrow.up.right")
-                    .font(.system(size: 14, weight: .semibold))
+                    .toluFont(14, weight: .semibold)
                     .foregroundStyle(Tolu.Palette.dim)
             }
             .padding(16)

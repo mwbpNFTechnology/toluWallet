@@ -19,7 +19,7 @@ struct ToluTextField: View {
         VStack(alignment: .leading, spacing: 8) {
             MonoLabel(label, tracking: 1.6)
             TextField(placeholder, text: $text, axis: axis)
-                .font(mono ? .toluMono(15) : .system(size: 15))
+                .modifier(ToluFont(size: 15, weight: mono ? .medium : .regular, design: mono ? .monospaced : .default))
                 .foregroundStyle(Tolu.Palette.text)
                 .tint(Tolu.Palette.lime)
                 .textInputAutocapitalization(mono ? .never : .sentences)

@@ -42,10 +42,10 @@ struct PrimaryButton: View {
                 }
                 Text(title)
             }
-            .font(.system(size: 16, weight: .semibold))
+            .toluFont(16, weight: .semibold)
             .foregroundStyle(Tolu.Palette.ink)
             .frame(maxWidth: .infinity)
-            .frame(height: 52)
+            .frame(minHeight: 52)
             .background(accent, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .opacity(isEnabled ? 1 : 0.5)
         }

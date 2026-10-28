@@ -15,11 +15,11 @@ struct NoticeCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: systemImage)
-                .font(.system(size: 13))
+                .toluFont(13)
                 .foregroundStyle(color)
                 .accessibilityHidden(true)
             Text(text)
-                .font(.system(size: 12))
+                .toluFont(12)
                 .foregroundStyle(Tolu.Palette.mute)
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)

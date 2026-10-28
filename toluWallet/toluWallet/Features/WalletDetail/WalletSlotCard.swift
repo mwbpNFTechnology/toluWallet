@@ -13,6 +13,13 @@ struct WalletSlotCard: View {
 
     @State private var passwordVisible = false
 
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.isSceneCaptured) private var isSceneCaptured
+
+    /// Same rule as the seed words: never shown while the app isn't in front
+    /// (so the app-switcher snapshot can't hold it) or the screen is recorded.
+    private var showsPassword: Bool { passwordVisible && scenePhase == .active && !isSceneCaptured }
+
     var body: some View {
         VStack(spacing: 9) {
             DetailRow(label: "key object id", value: "0x\(wallet.keyObjectID)")
@@ -21,20 +28,20 @@ struct WalletSlotCard: View {
             HStack(spacing: 8) {
                 MonoLabel("password", size: 8.5, color: Tolu.Palette.dim, tracking: 1.2)
                 Rectangle().fill(Tolu.Palette.line).frame(height: 1)
-                Text(passwordVisible ? wallet.password : String(repeating: "•", count: wallet.password.count))
-                    .font(.toluMono(11))
+                Text(showsPassword ? wallet.password : String(repeating: "•", count: wallet.password.count))
+                    .toluMono(11)
                     .foregroundStyle(Tolu.Palette.mute)
                     .lineLimit(1)
                     .textSelection(.enabled)
-                    .accessibilityLabel(passwordVisible ? wallet.password : "hidden")
+                    .accessibilityLabel(showsPassword ? wallet.password : "hidden")
                 Button(passwordVisible ? "Hide password" : "Show password",
                        systemImage: passwordVisible ? "eye.slash" : "eye") {
                     passwordVisible.toggle()
                 }
                 .labelStyle(.iconOnly)
-                .font(.system(size: 11, weight: .medium))
+                .toluFont(11, weight: .medium)
                 .foregroundStyle(Tolu.Palette.mute)
-                .buttonStyle(.plain)
+                .buttonStyle(TapTargetStyle())
             }
 
             if let limit = wallet.passwordAttemptLimit {
@@ -50,6 +57,10 @@ struct WalletSlotCard: View {
         }
         .padding(14)
         .toluCard()
+        // Leaving the app hides it again: coming back shows dots.
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { passwordVisible = false }
+        }
     }
 }
 

@@ -38,7 +38,7 @@ struct LockView: View {
                     MonoLabel("secp256k1 · keys stay on your tolu tag", color: Tolu.Palette.violet, tracking: 1.8)
                     ToluHeading(text: "unlock your\nwallets")
                     Text("your wallets, their tag slots and passwords are stored in the keychain behind \(store.unlockMethodName).")
-                        .font(.system(size: 13))
+                        .toluFont(13)
                         .foregroundStyle(Tolu.Palette.mute)
                         .lineSpacing(2)
                         .frame(maxWidth: 320, alignment: .leading)
@@ -46,7 +46,7 @@ struct LockView: View {
 
                 if let errorText {
                     Text(errorText)
-                        .font(.system(size: 12.5))
+                        .toluFont(12.5)
                         .foregroundStyle(Tolu.Palette.coral)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 14)

@@ -81,6 +81,11 @@ enum EvmRpc {
         try await string(chain, method: "eth_sendRawTransaction", params: ["0x" + Hex.string(signed)])
     }
 
+    /// Whether the node has the transaction, pending or mined.
+    static func transactionKnown(_ chain: Chain, hash: String) async throws -> Bool {
+        try await request(chain, method: "eth_getTransactionByHash", params: [hash]) is [String: Any]
+    }
+
     /// `nil` while the transaction is still pending; otherwise whether it succeeded.
     static func receiptStatus(_ chain: Chain, hash: String) async throws -> Bool? {
         let result = try await request(chain, method: "eth_getTransactionReceipt", params: [hash])
