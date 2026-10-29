@@ -3,14 +3,19 @@
 //  toluWallet
 //
 //  The data of a WriteECKey command for a secp256k1 key pair that one auth
-//  object (the password) guards. With no key values the tag generates the
+//  object (an iPhone's key) guards. With no key values the tag generates the
 //  pair itself; with both, it stores exactly that pair. The toluCold device
 //  sends the same bytes (tolu_cold/cold_se05x.h).
 //
 
 import Foundation
 
-enum KeyPairPayload {
+nonisolated enum KeyPairPayload {
+
+    /// Sign, verify and read the public key — only in that object's session.
+    /// No write and no delete: once on the tag the key can be used, never
+    /// replaced or removed.
+    static let walletPolicy = Se05x.policySign | Se05x.policyVerify | Se05x.policyRead
 
     /// - Parameters:
     ///   - keyObjectID: the slot for the key pair (4 bytes).

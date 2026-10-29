@@ -11,6 +11,8 @@ FLAGS=(-std=c++17 -O1 -g -Wall -Wextra -Werror -fsanitize=address,undefined -fno
 mkdir -p build
 "$CXX" "${FLAGS[@]}" test_crypto.cpp -o build/test_crypto
 "$CXX" "${FLAGS[@]}" -I stubs test_card.cpp -o build/test_card
+"$CXX" "${FLAGS[@]}" test_session.cpp -o build/test_session
 
 ./build/test_crypto vectors.txt
 ./build/test_card
+./build/test_session session_vectors.txt

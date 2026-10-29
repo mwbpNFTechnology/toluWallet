@@ -15,11 +15,15 @@
 // ---- The wallet it makes ----
 // 12 words (128 bits of entropy) or 24 words (256 bits).
 #define COLD_MNEMONIC_WORDS   12
-// Wrong passwords the card accepts before the key locks for good.
-// 0 would mean unlimited.
-#define COLD_MAX_ATTEMPTS     5
 // How many words of the phrase have to be confirmed.
 #define COLD_QUIZ_WORDS       3
+
+// ---- The card ----
+// The slot this device borrows on the card while it writes the key: a
+// temporary key of its own opens the encrypted session there, and is
+// deleted again before the write ends (cold_session.h). The app's two
+// slots may not be this one.
+#define COLD_TEMP_KEY_ID      0x7FFEC01DUL
 
 // ---- The button ----
 // One push button between this pin and GND. GPIO 0 is the BOOT button

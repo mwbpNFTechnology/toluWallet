@@ -10,7 +10,7 @@
 import Foundation
 
 enum ColdDeviceCommand {
-    /// The slots and password of a new wallet (see `ColdSetupPayload`). Starts
+    /// The slots and phone key of a new wallet (see `ColdSetupPayload`). Starts
     /// the ceremony — over again, if one was already running.
     case setup(Data)
     /// Stop whatever is going on and erase it. A device with nothing to

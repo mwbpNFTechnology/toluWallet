@@ -202,8 +202,7 @@ static inline void showIdleScreen() {
 }
 
 /// What the phone sent, so it can be checked before a card is touched.
-/// The password itself is never drawn.
-static inline void showSetupScreen(uint32_t keyId, uint32_t passwordId, uint8_t passwordLen) {
+static inline void showSetupScreen(uint32_t keyId, uint32_t phoneKeyId) {
   drawHeader("SETUP RECEIVED", COL_LIME);
   const uint8_t size = baseTextSize();
   int16_t y = headerBottom() + 4;
@@ -213,13 +212,11 @@ static inline void showSetupScreen(uint32_t keyId, uint32_t passwordId, uint8_t 
     y += lineHeight(size) + 8;
   };
 
-  snprintf(line, sizeof(line), "key slot  %08lX", (unsigned long)keyId);
+  snprintf(line, sizeof(line), "key slot   %08lX", (unsigned long)keyId);
   printRow(COL_FG);
-  snprintf(line, sizeof(line), "pass slot %08lX", (unsigned long)passwordId);
+  snprintf(line, sizeof(line), "phone slot %08lX", (unsigned long)phoneKeyId);
   printRow(COL_FG);
-  snprintf(line, sizeof(line), "password  %u characters", passwordLen);
-  printRow(COL_FG);
-  snprintf(line, sizeof(line), "attempts  %u, then locked", (unsigned)COLD_MAX_ATTEMPTS);
+  snprintf(line, sizeof(line), "only your iPhone, Face ID");
   printRow(COL_AMBER);
 
   layoutWrapped("Take the phone away, then hold the tolu card on the reader.",

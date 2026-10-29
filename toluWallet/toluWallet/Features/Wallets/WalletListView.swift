@@ -80,7 +80,7 @@ struct WalletListView: View {
         VStack(alignment: .leading, spacing: 12) {
             MonoLabel("secp256k1 · keys stay on your tolu tag", color: Tolu.Palette.violet, tracking: 1.8)
             ToluHeading(text: "your wallets")
-            Text("each wallet is a key on a tolu tag. the tag signs every transfer; this phone only keeps the slot and its password.")
+            Text("each wallet is a key on a tolu tag, bound to this iphone. the tag signs every transfer, in a session only this iphone can open after face id.")
                 .toluFont(13)
                 .foregroundStyle(Tolu.Palette.mute)
                 .lineSpacing(2)

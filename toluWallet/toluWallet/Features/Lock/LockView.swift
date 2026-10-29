@@ -37,7 +37,7 @@ struct LockView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     MonoLabel("secp256k1 · keys stay on your tolu tag", color: Tolu.Palette.violet, tracking: 1.8)
                     ToluHeading(text: "unlock your\nwallets")
-                    Text("your wallets, their tag slots and passwords are stored in the keychain behind \(store.unlockMethodName).")
+                    Text("your wallets and their tag slots are stored in the keychain behind \(store.unlockMethodName). the key that opens your tags never leaves this iphone's secure enclave.")
                         .toluFont(13)
                         .foregroundStyle(Tolu.Palette.mute)
                         .lineSpacing(2)

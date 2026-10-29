@@ -109,7 +109,7 @@ struct SeedPhraseTests {
     }
 
     private let keySlot: [UInt8] = [0x12, 0x22, 0x22, 0x21]
-    private let passwordSlot: [UInt8] = [0x12, 0x22, 0x22, 0x22]
+    private let phoneKeySlot: [UInt8] = [0x12, 0x22, 0x22, 0x22]
     /// Sign, verify and read — what a wallet key is allowed.
     private let walletPolicy: UInt32 = 0x1820_0000
 
@@ -117,7 +117,7 @@ struct SeedPhraseTests {
     /// same slots and the same key (printed from the firmware source).
     @Test func writesAKeyLikeTheFirmware() throws {
         let key = try #require(SeedPhraseKey(privateKey: (1...32).map { UInt8($0) }))
-        let payload = KeyPairPayload.make(keyObjectID: keySlot, authObjectID: passwordSlot,
+        let payload = KeyPairPayload.make(keyObjectID: keySlot, authObjectID: phoneKeySlot,
                                           policyMask: walletPolicy, importing: key)
         #expect(Hex.string(payload)
             == "1109" + "08" + "12222222" + "18200000"
@@ -131,7 +131,7 @@ struct SeedPhraseTests {
     /// With no key to store, the command asks the tag to make one — the
     /// bytes this app has always sent for a key generated in the tag.
     @Test func asksTheTagToGenerateWhenThereIsNoKey() {
-        let payload = KeyPairPayload.make(keyObjectID: keySlot, authObjectID: passwordSlot, policyMask: walletPolicy)
+        let payload = KeyPairPayload.make(keyObjectID: keySlot, authObjectID: phoneKeySlot, policyMask: walletPolicy)
         #expect(Hex.string(payload) == "1109" + "08" + "12222222" + "18200000" + "4104" + "12222221" + "420110")
     }
 }

@@ -68,13 +68,13 @@ struct CreateWalletRunSection: View {
         }
         switch model.origin {
         case .existing:
-            return "one tap opens the password session and reads the address."
+            return "face id, then one tap: this iphone opens its encrypted session and reads the address."
         case .tag:
-            return "tap once to create the key, then tap again to read the address back."
+            return "face id, then one tap: the tag makes the key, binds it to this iphone, and the address is read back — all encrypted."
         case .seedPhrase:
             return model.currentStep == 0
                 ? "one tap checks that the slots are free and takes a random number from the tag's secure element — the seed phrase is made from it. nothing is written yet."
-                : "tap once to write the key from your words, then tap again to read the address back."
+                : "face id, then one tap: the key from your words goes onto the tag inside an encrypted session, and the address is read back."
         }
     }
 }

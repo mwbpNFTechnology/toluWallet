@@ -93,7 +93,7 @@ struct WalletDetailView: View {
                             isPresented: $confirmRemove, titleVisibility: .visible) {
             Button("Remove wallet", role: .destructive) { remove() }
         } message: {
-            Text("The key stays on the tag. To use it again you'll need its object ids and password.")
+            Text("The key stays on the tag. To add it again on this iPhone, choose “already on the tag” with the same object ids.")
         }
     }
 

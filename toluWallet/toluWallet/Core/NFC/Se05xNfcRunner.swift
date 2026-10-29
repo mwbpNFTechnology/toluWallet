@@ -78,8 +78,8 @@ extension Se05xNfcRunner: NFCTagReaderSessionDelegate {
     }
 
     func tagReaderSession(_ session: NFCTagReaderSession, didDetect tags: [NFCTag]) {
-        // With two tags in range, the wrong one would spend one of its
-        // password attempts on this wallet's password. Wait for just one.
+        // With two tags in range the command could reach the wrong one — for
+        // an older wallet, spending one of its password attempts. Wait for just one.
         guard tags.count < 2 else {
             session.alertMessage = Se05xError.severalTags.localizedDescription
             Task {

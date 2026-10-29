@@ -2,8 +2,8 @@
 //  CreateWalletSetupSection.swift
 //  toluWallet
 //
-//  Stage one of creating a wallet: the label, the tag slots, the password,
-//  and where the key comes from.
+//  Stage one of creating a wallet: the label, the tag slots, and where the
+//  key comes from.
 //
 
 import SwiftUI
@@ -21,8 +21,7 @@ struct CreateWalletSetupSection: View {
             WalletSetupFields(
                 label: $model.label,
                 keyObjectID: $model.keyObjectIdText,
-                password: $model.password,
-                passwordObjectID: $model.passwordObjectIdText,
+                phoneKeyObjectID: $model.phoneKeyObjectIdText,
                 slotsCollide: model.slotsCollide,
                 slotsLocked: model.hasWrittenToTag,
                 accent: accent
@@ -55,7 +54,7 @@ struct CreateWalletSetupSection: View {
             }
         }
         .onChange(of: model.keyObjectIdText) { model.keySlotChanged() }
-        .onChange(of: model.passwordObjectIdText) { model.passwordSlotChanged() }
+        .onChange(of: model.phoneKeyObjectIdText) { model.phoneKeySlotChanged() }
     }
 
     /// What is worth knowing about the chosen way before going on.
@@ -64,7 +63,7 @@ struct CreateWalletSetupSection: View {
         if model.hasWrittenToTag {
             NoticeCard(
                 systemImage: "lock",
-                text: "These slots and this password are already on the tag and can't be removed. Only the label can change now — continue to finish this wallet."
+                text: "The key may already be on the tag, where it can't be removed. Only the label can change now — continue to finish this wallet."
             )
         } else {
             originNotice
@@ -77,7 +76,7 @@ struct CreateWalletSetupSection: View {
         case .tag:
             NoticeCard(
                 systemImage: "exclamationmark.triangle",
-                text: "The key is generated inside the tag and can't be exported or backed up. If the tag is lost, or the password is forgotten or entered wrong \(WalletRecord.defaultPasswordAttemptLimit) times, whatever this wallet holds is gone."
+                text: "The key is generated inside the tag and can't be exported or backed up, and only this iPhone can sign with it. If the tag is lost, or this iPhone is lost or erased, whatever this wallet holds is gone."
             )
         case .seedPhrase:
             NoticeCard(

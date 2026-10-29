@@ -2,16 +2,20 @@
 //  tolu_cold.ino — offline key ceremony for a toluWallet card
 //
 //  Makes a wallet whose private key never touches a phone or the
-//  internet. The phone hands over only the slots and the password. The
-//  seed phrase starts from random numbers generated inside the card's
-//  secure element, mixed with this chip's own; it is shown once on
-//  this screen, and the key goes straight onto the card.
+//  internet. The phone hands over only the slots and its own public key
+//  — nothing secret. The seed phrase starts from random numbers
+//  generated inside the card's secure element, mixed with this chip's
+//  own; it is shown once on this screen, and the key goes straight onto
+//  the card, bound to the phone's key: only a session that phone opens,
+//  after Face ID, can ever use it.
 //
-//    1. phone on the reader   → slots + password arrive
+//    1. phone on the reader   → slots + the phone's public key arrive
 //    2. card on the reader    → random numbers from the secure element → 12 words
 //    3. write the words down  → confirm three of them with the button
-//    4. card on the reader    → password object + key written, read back
-//    5. QR with the address   → scan it in toluWallet
+//    4. card on the reader    → phone key + wallet key written, the key
+//                               inside an encrypted session (cold_session.h)
+//    5. QR with the address   → scan it in toluWallet, which checks the
+//                               card in its own session
 //
 //  Until the wallet is finished the phone can tap again to cancel, or
 //  to start over with new details; while the card is awaited, holding
@@ -22,8 +26,8 @@
 //  Arduino core. Pins and options are in config.h.
 //
 //  There is no Wi-Fi, no Bluetooth and no serial protocol in this
-//  sketch. Serial prints progress only — never the words, the key or
-//  the password. Keep it that way.
+//  sketch. Serial prints progress only — never the words or the key.
+//  Keep it that way.
 // ═══════════════════════════════════════════════════════════════
 
 #include <SPI.h>
@@ -43,6 +47,9 @@
 #include "cold_target.h"
 #include "cold_reader.h"
 #include "cold_se05x.h"
+#include "cold_aes.h"
+#include "cold_p256.h"
+#include "cold_session.h"
 #include "cold_state.h"
 
 ColdButton  button;
@@ -160,6 +167,19 @@ static bool selectCard() {
   return false;
 }
 
+/// True when the phone key slot is free or already holds this phone's
+/// key. Otherwise the flow has been failed, as for `slotIsFree`.
+static bool phoneKeySlotUsable() {
+  const int slot = se05xPhoneKeySlot(secrets.setup.phoneKeyId, secrets.setup.phoneKey);
+  if (slot == 0 || slot == 1) return true;
+  if (slot < 0) {
+    failCardStep("The card did not answer");
+    return false;
+  }
+  failFatal("The phone key slot holds another key on this card. Choose another object id in the app.");
+  return false;
+}
+
 /// True when nothing is in the slot. Otherwise the flow has been
 /// failed: for good if the slot is taken, for another try if the card
 /// did not say.
@@ -183,7 +203,7 @@ static bool slotIsFree(uint32_t objectId, const char* name) {
 static void beginCeremony(const ColdSetup& setup) {
   secrets.wipeAll();
   secrets.setup = setup;
-  showSetupScreen(setup.keyId, setup.passwordId, setup.passwordLen);
+  showSetupScreen(setup.keyId, setup.phoneKeyId);
   // Give the phone time to leave before the reader field comes on — a
   // phone in a reader field offers Apple Pay.
   delay(PHONE_AWAY_MS);
@@ -193,9 +213,8 @@ static void beginCeremony(const ColdSetup& setup) {
 /// Stops the ceremony and forgets everything: asked for by the phone,
 /// or by holding the button while the card is awaited.
 static void cancelCeremony() {
-  const char* onCard = secrets.keyWritten      ? "The key is already on the card."
-                     : secrets.passwordWritten ? "The password object is already on the card: use another password slot next time."
-                     :                           "Nothing was written to the card.";
+  const char* onCard = secrets.keyWritten ? "The key may already be on the card: use another key slot next time."
+                                         : "No key was written to the card.";
   secrets.wipeAll();
   radioOff();
   Serial.println("[flow] cancelled");
@@ -276,8 +295,15 @@ static void readEntropy() {
               "Taking random numbers from the card's secure element. Keep it on the reader.");
   if (!selectCard()) return;
 
+  // This card, and no other, gets the key.
+  if (!se05xReadUniqueId(secrets.cardId)) {
+    failCardStep("The card did not say which card it is");
+    return;
+  }
+  secrets.cardChosen = true;
+
   // Find out now that a slot is taken — not after the words are written down.
-  if (!slotIsFree(secrets.setup.keyId, "key") || !slotIsFree(secrets.setup.passwordId, "password")) return;
+  if (!slotIsFree(secrets.setup.keyId, "key") || !phoneKeySlotUsable()) return;
 
   const uint8_t entropyLen = (COLD_MNEMONIC_WORDS == 24) ? 32 : 16;
   uint8_t entropy[32];
@@ -349,42 +375,81 @@ static void writeKey() {
 
   const ColdSetup& setup = secrets.setup;
 
-  // Whatever this run has not written yet must still be free. A
-  // different card than the first tap, or a slot filled in between,
-  // stops here.
-  if (!secrets.passwordWritten && !slotIsFree(setup.passwordId, "password")) return;
-  if (!secrets.keyWritten && !slotIsFree(setup.keyId, "key")) return;
-
-  // Same order as the toluWallet app: curve, password, key.
-  if (!secrets.keyWritten) se05xInitCurve();
-
-  if (!secrets.passwordWritten) {
-    if (!se05xCreatePassword(setup.passwordId, setup.password, setup.passwordLen, COLD_MAX_ATTEMPTS)) {
-      failCardStep("The password could not be written");
-      return;
-    }
-    secrets.passwordWritten = true;
-    Serial.println("[card] password object written");
-  }
-
-  if (!secrets.keyWritten) {
-    if (!se05xImportKeyPair(setup.keyId, setup.passwordId, secrets.privateKey, secrets.publicKey)) {
-      failCardStep("The key could not be written");
-      return;
-    }
-    secrets.keyWritten = true;
-    Serial.println("[card] key written");
-  }
-
-  // Prove it: open a session with the password and read the public key
-  // back. This is the same thing the phone will do to use the wallet.
-  uint8_t sessionId[SE_SESSION_ID_LEN];
-  if (!se05xOpenSession(setup.passwordId, setup.password, setup.passwordLen, sessionId)) {
-    failCardStep("The card did not accept the password");
+  // Only the card the words were made with. On any other card the key
+  // slot could hold someone else's key, and the phone key would be missing.
+  uint8_t cardId[SE_UNIQUE_ID_LEN];
+  if (!se05xReadUniqueId(cardId)) {
+    failCardStep("The card did not say which card it is");
     return;
   }
-  if (!se05xKeyMatches(sessionId, setup.keyId, secrets.publicKey)) {
-    failCardStep("The key on the card does not match");
+  const bool sameCard = secrets.cardChosen && memcmp(cardId, secrets.cardId, sizeof(cardId)) == 0;
+  coldWipe(cardId, sizeof(cardId));
+  if (!sameCard) {
+    fail("This is not the card the words were made with. Hold that card on the reader.", state, "hold: try again");
+    return;
+  }
+
+  // The phone key: free, or already this phone's (an earlier wallet, or
+  // an earlier try of this one).
+  const int phoneSlot = se05xPhoneKeySlot(setup.phoneKeyId, setup.phoneKey);
+  if (phoneSlot < 0) { failCardStep("The card did not answer"); return; }
+  if (phoneSlot == 2) {
+    failFatal("The phone key slot holds another key on this card. Choose another object id in the app.");
+    return;
+  }
+
+  // The key slot was free when the words were made. Taken now, it is
+  // this run's key — but only if this run got as far as writing it.
+  const int keySlot = se05xExists(setup.keyId);
+  if (keySlot < 0) { failCardStep("The card did not answer"); return; }
+  if (keySlot == 1 && !secrets.keyWritten) {
+    failFatal("The key slot is already used on this card. Choose another object id in the app.");
+    return;
+  }
+
+  // Same order as the toluWallet app: curves, phone key, wallet key.
+  if (phoneSlot == 0 || keySlot == 0) se05xInitCurves();
+  if (phoneSlot == 0 && !se05xWritePhoneKey(setup.phoneKeyId, setup.phoneKey)) {
+    failCardStep("The phone key could not be written");
+    return;
+  }
+  if (keySlot == 0) {
+    // From here the slot may hold the key, even if its answer gets lost.
+    secrets.keyWritten = true;
+    const SeSealedResult sealed = se05xImportKeyPairSealed(setup.keyId, setup.phoneKeyId, COLD_TEMP_KEY_ID,
+                                                           secrets.privateKey, secrets.publicKey);
+    switch (sealed) {
+      case SE_SEALED_OK:
+        break;
+      case SE_SEALED_SLOT_TAKEN: {
+        char message[112];
+        snprintf(message, sizeof(message), "Slot %08lX on this card holds an object this device can't remove. It needs that slot.",
+                 (unsigned long)COLD_TEMP_KEY_ID);
+        failFatal(message);
+        return;
+      }
+      case SE_SEALED_NO_SESSION:
+        failCardStep("The card would not open an encrypted session");
+        return;
+      case SE_SEALED_KEY_REFUSED:
+        failCardStep("The key could not be written");
+        return;
+      case SE_SEALED_TAMPERED:
+        failCardStep("An answer from the card did not check out");
+        return;
+      case SE_SEALED_NO_ANSWER:
+      default:
+        failCardStep("The card did not answer");
+        return;
+    }
+    Serial.println("[card] key written, encrypted");
+  }
+
+  // This device can't read the key back: only the phone's session may.
+  // That is the phone's last step — it reads the key in its own session
+  // and must find the address on this screen. Here: the key is there.
+  if (se05xExists(setup.keyId) != 1) {
+    failCardStep("The key is not on the card");
     return;
   }
 
@@ -538,6 +603,7 @@ void setup() {
   }
   nfc.SAMConfig();
   se05xExchange = readerExchange;
+  coldSessionRandom = esp_fill_random;
 
   enterWaitPhone();
   Serial.println("Ready.");

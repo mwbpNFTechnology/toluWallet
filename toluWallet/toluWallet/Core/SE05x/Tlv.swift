@@ -7,10 +7,20 @@
 
 import Foundation
 
-enum Tlv {
-    /// Encodes a TLV with a single-byte length (values here are always short).
+nonisolated enum Tlv {
+    /// Encodes a TLV: the short length form up to 127 bytes, then the
+    /// 0x81 / 0x82 long forms (a wrapped session command can be longer).
     static func encode(_ tag: UInt8, _ value: [UInt8]) -> [UInt8] {
-        [tag, UInt8(value.count)] + value
+        [tag] + length(value.count) + value
+    }
+
+    /// An ISO 7816 BER length field.
+    static func length(_ count: Int) -> [UInt8] {
+        switch count {
+        case ..<0x80: [UInt8(count)]
+        case ..<0x100: [0x81, UInt8(count)]
+        default: [0x82, UInt8(truncatingIfNeeded: count >> 8), UInt8(truncatingIfNeeded: count)]
+        }
     }
 
     /// Returns the value of the first top-level TLV with the given tag.

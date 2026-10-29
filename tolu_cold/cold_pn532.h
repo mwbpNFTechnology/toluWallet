@@ -67,7 +67,7 @@ static inline int16_t nfcExchange(const uint8_t* header, uint8_t headerLen,
     result = n - 1;
     memcpy(out, frame + 1, result);
   }
-  coldWipe(frame, sizeof(frame));      // it may have carried a password
+  coldWipe(frame, sizeof(frame));      // it may have carried a key
   return result;
 }
 

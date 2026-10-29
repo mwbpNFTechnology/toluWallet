@@ -28,11 +28,11 @@ enum KeyOrigin: CaseIterable, Identifiable {
     var detail: String {
         switch self {
         case .tag:
-            "the tag generates the key and it never leaves. no backup exists — lose the tag and the wallet is gone."
+            "the tag generates the key and it never leaves. no backup exists, and only this iphone can sign with it — lose the tag or this phone and the wallet is gone."
         case .seedPhrase:
             "12 words made from a random number generated inside the tag's secure element, mixed with this phone's own. you write them down, then their key goes onto the tag. the words restore the wallet anywhere."
         case .existing:
-            "import a wallet made earlier. nothing is written — the tag is only read, using the slots and password above."
+            "add a wallet this iphone made earlier. nothing is written — the tag is only read, in this iphone's session, using the slots above."
         }
     }
 

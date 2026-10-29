@@ -16,7 +16,7 @@ extension Se05xTag {
         let response = try await execute(cla: Se05x.cla, ins: Se05x.insRead,
                                          p1: Se05x.p1Default, p2: Se05x.p2Default,
                                          data: Tlv.encode(Se05x.tag1, Se05x.reservedUniqueId),
-                                         operation: "read unique id")
+                                         extendedLength: true, operation: "read unique id")
         let value = Tlv.findValue(response, tag: Se05x.tag1) ?? response
         var hex = Hex.string(value)
         if hex.count < 40 { hex = String(repeating: "0", count: 40 - hex.count) + hex }
@@ -30,7 +30,7 @@ extension Se05xTag {
         let response = try await execute(cla: Se05x.cla, ins: Se05x.insRead,
                                          p1: Se05x.p1Default, p2: Se05x.p2Default,
                                          data: Tlv.encode(Se05x.tag1, objectId),
-                                         operation: "read public key")
+                                         extendedLength: true, operation: "read public key")
         var foundPoint = false
         var i = 0
         while i + 65 <= response.count {

@@ -13,13 +13,14 @@
 #include "cold_util.h"
 #include "cold_bip39.h"
 #include "cold_target.h"
+#include "cold_se05x.h"
 
 enum ColdState {
   ST_WAIT_PHONE,          // armed as a card, waiting for the setup
   ST_WAIT_CARD_ENTROPY,   // waiting for the card: check slots, get random
   ST_SHOW_WORDS,          // the seed phrase is on screen
   ST_QUIZ,                // confirming words
-  ST_WAIT_CARD_WRITE,     // waiting for the card: write password + key
+  ST_WAIT_CARD_WRITE,     // waiting for the card: write phone key + wallet key
   ST_DONE,                // address QR
   ST_FAILED               // a message; hold to go on
 };
@@ -47,9 +48,11 @@ struct ColdSecrets {
   uint8_t   privateKey[32];
   uint8_t   publicKey[65];
   char      address[43];
-  // What already made it onto the card in this run, so a retry picks
-  // up where it stopped instead of tripping over its own objects.
-  bool      passwordWritten = false;
+  // The card this run started writing to, and whether the key may be on
+  // it already — so a retry picks up where it stopped on THAT card, and
+  // never mistakes another card's key for its own.
+  uint8_t   cardId[SE_UNIQUE_ID_LEN];
+  bool      cardChosen = false;
   bool      keyWritten = false;
 
   void wipeKeyMaterial() {
@@ -63,7 +66,8 @@ struct ColdSecrets {
     wipeKeyMaterial();
     coldWipe(publicKey, sizeof(publicKey));
     coldWipe(address, sizeof(address));
-    passwordWritten = false;
+    coldWipe(cardId, sizeof(cardId));
+    cardChosen = false;
     keyWritten = false;
   }
 };

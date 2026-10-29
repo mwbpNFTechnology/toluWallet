@@ -2,8 +2,8 @@
 //  WalletSetupFields.swift
 //  toluWallet
 //
-//  The four things every way of making a wallet asks for: a label, the slot
-//  for the key, the password, and the slot for the password.
+//  The three things every way of making a wallet asks for: a label, the
+//  slot for the key, and the slot for this iPhone's key that unlocks it.
 //
 
 import SwiftUI
@@ -11,11 +11,10 @@ import SwiftUI
 struct WalletSetupFields: View {
     @Binding var label: String
     @Binding var keyObjectID: String
-    @Binding var password: String
-    @Binding var passwordObjectID: String
+    @Binding var phoneKeyObjectID: String
     /// True when the two slots hold the same id.
     let slotsCollide: Bool
-    /// True once the slots and password are on the tag: only the label can change.
+    /// True once the slots are in use on the tag: only the label can change.
     var slotsLocked = false
     var accent: Color = Tolu.Palette.lime
 
@@ -30,15 +29,11 @@ struct WalletSetupFields: View {
                     HexBlockField(label: "key object id", text: $keyObjectID, accent: accent)
                 }
 
-                field(hint: "the tag asks for this before every signature. it is saved on this phone behind face id. \(WalletRecord.defaultPasswordAttemptLimit) wrong tries lock the key for good.") {
-                    PasswordField(label: "password", text: $password, accent: accent)
-                }
-
                 VStack(alignment: .leading, spacing: 11) {
-                    HexBlockField(label: "password object id", text: $passwordObjectID, accent: accent)
-                    SetupHint("the slot on the tag that holds the password guarding the key.")
+                    HexBlockField(label: "phone key object id", text: $phoneKeyObjectID, accent: accent)
+                    SetupHint("the slot on the tag for this iphone's public key. the wallet key only works in a session this iphone opens, after face id — nothing secret ever crosses nfc. several wallets can share it.")
                     if slotsCollide {
-                        Text("the password slot must differ from the key slot.")
+                        Text("the phone key slot must differ from the key slot.")
                             .toluFont(12)
                             .foregroundStyle(Tolu.Palette.coral)
                     }
@@ -60,8 +55,7 @@ struct WalletSetupFields: View {
 #Preview {
     ScrollView {
         WalletSetupFields(label: .constant("daily wallet"), keyObjectID: .constant("00000001"),
-                          password: .constant("hunter2"), passwordObjectID: .constant("00000002"),
-                          slotsCollide: false)
+                          phoneKeyObjectID: .constant("00000002"), slotsCollide: false)
             .padding()
     }
     .background(Tolu.Palette.ink)

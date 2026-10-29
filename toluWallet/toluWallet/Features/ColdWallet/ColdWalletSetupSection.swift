@@ -2,8 +2,9 @@
 //  ColdWalletSetupSection.swift
 //  toluWallet
 //
-//  Stage one of a cold-device wallet: the same label, slots and password as
-//  any wallet — they are what the phone hands to the device.
+//  Stage one of a cold-device wallet: the same label and slots as any
+//  wallet — they, and this iPhone's public key, are what the phone hands to
+//  the device.
 //
 
 import SwiftUI
@@ -17,7 +18,7 @@ struct ColdWalletSetupSection: View {
         VStack(alignment: .leading, spacing: 24) {
             VStack(alignment: .leading, spacing: 10) {
                 ToluHeading(text: "the key is made\noff this phone", accent: accent)
-                Text("A toluCold device makes the seed phrase from a random number generated inside the card's secure element, shows it to you once, and writes the key to the card. This phone only sends where the key goes and the password that guards it.")
+                Text("A toluCold device makes the seed phrase from a random number generated inside the card's secure element, shows it to you once, and writes the key to the card. This phone only sends where the key goes and its own public key — only this iPhone, after Face ID, will be able to use the key.")
                     .toluFont(13)
                     .foregroundStyle(Tolu.Palette.mute)
                     .lineSpacing(3)
@@ -27,8 +28,7 @@ struct ColdWalletSetupSection: View {
             WalletSetupFields(
                 label: $model.label,
                 keyObjectID: $model.keyObjectIdText,
-                password: $model.password,
-                passwordObjectID: $model.passwordObjectIdText,
+                phoneKeyObjectID: $model.phoneKeyObjectIdText,
                 slotsCollide: model.slotsCollide,
                 accent: accent
             )
@@ -51,7 +51,7 @@ struct ColdWalletSetupSection: View {
             }
         }
         .onChange(of: model.keyObjectIdText) { model.keySlotChanged() }
-        .onChange(of: model.passwordObjectIdText) { model.passwordSlotChanged() }
+        .onChange(of: model.phoneKeyObjectIdText) { model.phoneKeySlotChanged() }
     }
 }
 

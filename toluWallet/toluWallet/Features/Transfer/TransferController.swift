@@ -290,17 +290,28 @@ final class TransferController {
     private func sign() async throws {
         guard let transaction,
               let key = ObjectId.parse(wallet.keyObjectID),
-              let slot = ObjectId.parse(wallet.passwordObjectID) else {
+              let slot = ObjectId.parse(wallet.authObjectID) else {
             throw TransferError.notPrepared
         }
         let hash = transaction.signingHash
         let expectedAddress = wallet.address.lowercased()
-        let passwordBytes = Array(wallet.password.utf8)
+
+        // Face ID before the NFC sheet, so the two prompts never overlap.
+        let signer: DeviceKeySigner? = switch wallet.unlock {
+        case .thisPhone: try await DeviceKey.unlock(reason: "Sign this transfer")
+        case .password: nil
+        }
 
         let (der, point) = try await runner.run(
             alertMessage: "Hold your iPhone near the tolu tag to sign"
         ) { tag in
-            try await tag.openUserIdSession(userObjectId: slot.bytes, pin: passwordBytes)
+            switch self.wallet.unlock {
+            case .thisPhone:
+                guard let signer else { throw TransferError.notPrepared }
+                try await tag.openECKeySession(authObjectId: slot.bytes, signer: signer)
+            case .password(let password):
+                try await tag.openUserIdSession(userObjectId: slot.bytes, pin: Array(password.utf8))
+            }
             let point = try await tag.readPublicKeyPoint(objectId: key.bytes)
             // Same slot and password on another tag would sign for another address.
             guard EthereumAddress.from(publicKeyPoint: point) == expectedAddress else {

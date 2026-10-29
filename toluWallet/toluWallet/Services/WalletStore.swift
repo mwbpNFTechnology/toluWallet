@@ -125,8 +125,8 @@ final class WalletStore {
 
     /// Object ids already used by saved wallets — to suggest free slots.
     var usedObjectIDs: [UInt32] {
-        var ids = wallets.flatMap { [$0.keyObjectID, $0.passwordObjectID] }
-        if let coldDraft { ids += [coldDraft.keyObjectID, coldDraft.passwordObjectID] }
+        var ids = wallets.flatMap { [$0.keyObjectID, $0.authObjectID] }
+        if let coldDraft { ids += [coldDraft.keyObjectID, coldDraft.phoneKeyObjectID] }
         return ids.compactMap { UInt32($0, radix: 16) }
     }
 

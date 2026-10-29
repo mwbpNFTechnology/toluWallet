@@ -2,8 +2,8 @@
 //  ColdSetupPayloadTests.swift
 //  toluWalletTests
 //
-//  The same bytes are fed to the firmware's parser in its own test, so the
-//  phone and the device are checked against one example.
+//  The setup the app hands a toluCold device, against the bytes the
+//  firmware's tests parse (tolu_cold/test/test_card.cpp).
 //
 
 import Foundation
@@ -14,13 +14,14 @@ import Testing
 struct ColdSetupPayloadTests {
 
     private let key: [UInt8] = [0x12, 0x22, 0x22, 0x21]
-    private let passwordSlot: [UInt8] = [0x12, 0x22, 0x22, 0x22]
+    private let phoneKeySlot: [UInt8] = [0x12, 0x22, 0x22, 0x22]
+    private let phoneKey = Hex.bytes(PhoneKeyObjectTests.phoneKey) ?? []
 
     @Test func matchesTheFirmwareExample() throws {
         let payload = try #require(ColdSetupPayload.make(
-            keyObjectID: key, passwordObjectID: passwordSlot, password: Array("abcdef".utf8)
+            keyObjectID: key, phoneKeyObjectID: phoneKeySlot, phoneKey: phoneKey
         ))
-        #expect(Hex.string(payload) == "011222222112222222" + "06" + "616263646566")
+        #expect(Hex.string(payload) == "02" + "12222221" + "12222222" + PhoneKeyObjectTests.phoneKey)
     }
 
     /// The instruction bytes the firmware answers (tolu_cold/cold_target.h).
@@ -33,13 +34,15 @@ struct ColdSetupPayloadTests {
     }
 
     @Test func refusesWhatTheDeviceWouldRefuse() {
-        let password = Array("abcdef".utf8)
-        #expect(ColdSetupPayload.make(keyObjectID: key, passwordObjectID: key, password: password) == nil)
-        #expect(ColdSetupPayload.make(keyObjectID: [0, 0, 0, 0], passwordObjectID: passwordSlot, password: password) == nil)
-        #expect(ColdSetupPayload.make(keyObjectID: [0x7F, 0xFF, 0x02, 0x06], passwordObjectID: passwordSlot, password: password) == nil)
-        #expect(ColdSetupPayload.make(keyObjectID: key, passwordObjectID: passwordSlot, password: Array("abc".utf8)) == nil)
-        #expect(ColdSetupPayload.make(keyObjectID: key, passwordObjectID: passwordSlot, password: Array(repeating: 0x61, count: 17)) == nil)
-        #expect(ColdSetupPayload.make(keyObjectID: [0x12], passwordObjectID: passwordSlot, password: password) == nil)
+        #expect(ColdSetupPayload.make(keyObjectID: key, phoneKeyObjectID: key, phoneKey: phoneKey) == nil)
+        #expect(ColdSetupPayload.make(keyObjectID: [0, 0, 0, 0], phoneKeyObjectID: phoneKeySlot, phoneKey: phoneKey) == nil)
+        #expect(ColdSetupPayload.make(keyObjectID: [0x7F, 0xFF, 0x02, 0x06], phoneKeyObjectID: phoneKeySlot,
+                                      phoneKey: phoneKey) == nil)
+        #expect(ColdSetupPayload.make(keyObjectID: key, phoneKeyObjectID: phoneKeySlot,
+                                      phoneKey: Array(phoneKey.dropLast())) == nil)
+        #expect(ColdSetupPayload.make(keyObjectID: key, phoneKeyObjectID: phoneKeySlot,
+                                      phoneKey: [0x02] + phoneKey.dropFirst()) == nil)
+        #expect(ColdSetupPayload.make(keyObjectID: [0x12], phoneKeyObjectID: phoneKeySlot, phoneKey: phoneKey) == nil)
     }
 
     @Test func readsAddressesFromQRCodes() {

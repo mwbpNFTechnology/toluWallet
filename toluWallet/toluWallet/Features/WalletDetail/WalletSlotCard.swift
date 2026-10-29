@@ -2,8 +2,8 @@
 //  WalletSlotCard.swift
 //  toluWallet
 //
-//  Where this wallet lives on the tag: its slots, password and card id. These
-//  are what is needed to import the wallet on another phone.
+//  Where this wallet lives on the tag: its slots, what unlocks it, and the
+//  card id. A wallet made before the iPhone key still shows its password.
 //
 
 import SwiftUI
@@ -23,25 +23,15 @@ struct WalletSlotCard: View {
     var body: some View {
         VStack(spacing: 9) {
             DetailRow(label: "key object id", value: "0x\(wallet.keyObjectID)")
-            DetailRow(label: "password object id", value: "0x\(wallet.passwordObjectID)")
 
-            HStack(spacing: 8) {
-                MonoLabel("password", size: 8.5, color: Tolu.Palette.dim, tracking: 1.2)
-                Rectangle().fill(Tolu.Palette.line).frame(height: 1)
-                Text(showsPassword ? wallet.password : String(repeating: "•", count: wallet.password.count))
-                    .toluMono(11)
-                    .foregroundStyle(Tolu.Palette.mute)
-                    .lineLimit(1)
-                    .textSelection(.enabled)
-                    .accessibilityLabel(showsPassword ? wallet.password : "hidden")
-                Button(passwordVisible ? "Hide password" : "Show password",
-                       systemImage: passwordVisible ? "eye.slash" : "eye") {
-                    passwordVisible.toggle()
-                }
-                .labelStyle(.iconOnly)
-                .toluFont(11, weight: .medium)
-                .foregroundStyle(Tolu.Palette.mute)
-                .buttonStyle(TapTargetStyle())
+            switch wallet.unlock {
+            case .thisPhone:
+                DetailRow(label: "phone key object id", value: "0x\(wallet.authObjectID)")
+                DetailRow(label: "unlocks with", value: "this iphone · face id", valueColor: Tolu.Palette.lime)
+            case .password(let password):
+                DetailRow(label: "password object id", value: "0x\(wallet.authObjectID)")
+                passwordRow(password)
+                DetailRow(label: "unlocks with", value: "password, sent in the clear", valueColor: Tolu.Palette.amber)
             }
 
             if let limit = wallet.passwordAttemptLimit {
@@ -60,6 +50,27 @@ struct WalletSlotCard: View {
         // Leaving the app hides it again: coming back shows dots.
         .onChange(of: scenePhase) { _, phase in
             if phase != .active { passwordVisible = false }
+        }
+    }
+
+    private func passwordRow(_ password: String) -> some View {
+        HStack(spacing: 8) {
+            MonoLabel("password", size: 8.5, color: Tolu.Palette.dim, tracking: 1.2)
+            Rectangle().fill(Tolu.Palette.line).frame(height: 1)
+            Text(showsPassword ? password : String(repeating: "•", count: password.count))
+                .toluMono(11)
+                .foregroundStyle(Tolu.Palette.mute)
+                .lineLimit(1)
+                .textSelection(.enabled)
+                .accessibilityLabel(showsPassword ? password : "hidden")
+            Button(passwordVisible ? "Hide password" : "Show password",
+                   systemImage: passwordVisible ? "eye.slash" : "eye") {
+                passwordVisible.toggle()
+            }
+            .labelStyle(.iconOnly)
+            .toluFont(11, weight: .medium)
+            .foregroundStyle(Tolu.Palette.mute)
+            .buttonStyle(TapTargetStyle())
         }
     }
 }

@@ -8,10 +8,18 @@
 #include <stddef.h>
 
 /// Overwrites a buffer in a way the optimiser may not remove. Used on
-/// everything that held a password, a seed word or a key.
+/// everything that held a seed word or a key.
 static inline void coldWipe(void* p, size_t n) {
   volatile uint8_t* v = (volatile uint8_t*)p;
   while (n--) *v++ = 0;
+}
+
+/// Compares in a time that does not depend on where the first
+/// difference is — for MACs, which must not be guessable byte by byte.
+static inline bool coldEqual(const uint8_t* a, const uint8_t* b, size_t n) {
+  uint8_t difference = 0;
+  for (size_t i = 0; i < n; i++) difference |= a[i] ^ b[i];
+  return difference == 0;
 }
 
 // ── Big-endian integers ──────────────────────────────────────

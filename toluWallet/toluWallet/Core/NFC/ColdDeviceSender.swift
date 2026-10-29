@@ -3,7 +3,7 @@
 //  toluWallet
 //
 //  Talks to a toluCold device over NFC: hands it a new wallet's slots and
-//  password, or tells it to cancel.
+//  this iPhone's public key, or tells it to cancel.
 //
 //  The phone stays the reader — an iPhone can't act as a card — and the
 //  device's PN532 goes into card mode to listen. One short APDU says it all:
@@ -12,8 +12,9 @@
 //      phone → 80 20 00 00 <Lc> <setup>      → 9000      start a wallet
 //      phone → 80 21 00 00                   → 9000      cancel
 //
-//  Only where the key will live and the password that will guard it cross
-//  here. The key itself is made on the device and goes straight to the card.
+//  Nothing secret crosses here: where the key will live, and the public key
+//  that will guard it. The key itself is made on the device and goes
+//  straight to the card.
 //
 
 import CoreNFC
@@ -34,9 +35,9 @@ final class ColdDeviceSender: NSObject {
     var isAvailable: Bool { NFCTagReaderSession.readingAvailable }
 
     /// Resumes once the device has accepted the setup, throws otherwise.
-    func send(keyObjectID: [UInt8], passwordObjectID: [UInt8], password: [UInt8]) async throws {
-        guard let payload = ColdSetupPayload.make(keyObjectID: keyObjectID, passwordObjectID: passwordObjectID,
-                                                  password: password) else {
+    func send(keyObjectID: [UInt8], phoneKeyObjectID: [UInt8], phoneKey: [UInt8]) async throws {
+        guard let payload = ColdSetupPayload.make(keyObjectID: keyObjectID, phoneKeyObjectID: phoneKeyObjectID,
+                                                  phoneKey: phoneKey) else {
             throw ColdDeviceError.invalidSetup
         }
         try await perform(.setup(payload), alert: "Hold your phone to the toluCold reader",

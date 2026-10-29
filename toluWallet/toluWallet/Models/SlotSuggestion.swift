@@ -3,7 +3,7 @@
 //  toluWallet
 //
 //  Object-id arithmetic for the create screens: a wallet takes two slots on
-//  the card, and the password slot defaults to the one after the key slot.
+//  the card, and the phone key slot defaults to the one after the key slot.
 //
 
 import Foundation

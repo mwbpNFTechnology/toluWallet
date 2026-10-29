@@ -1,6 +1,6 @@
 // ============================================================
 // cold_target.h - the PN532 as a card, so the phone can hand over
-//                 the wallet's slots and password
+//                 the wallet's slots and its own public key
 // ============================================================
 // An iPhone cannot act as a card towards another reader, but it is
 // already an ISO 7816 reader for the tolu card. So the PN532 goes into
@@ -11,17 +11,20 @@
 //   phone → 80 20 00 00 <Lc> <setup>           → 9000     start a wallet
 //   phone → 80 21 00 00                        → 9000     cancel
 //
-//   setup = 01                      format version
-//           <key object id, 4>      where the secp256k1 key will live
-//           <password object id, 4> where the password that guards it lives
-//           <n> <password, n>       4..16 bytes
+//   setup = 02                        format version
+//           <key object id, 4>        where the secp256k1 key will live
+//           <phone key object id, 4>  where the phone's public key goes
+//           <phone key, 65>           04 || X || Y on NIST P-256
 //
 // The phone can do this at any point up to the finished wallet: a
 // setup starts the ceremony (over again, if one was running) and a
 // cancel ends it.
 //
-// Nothing secret about the wallet's KEY crosses here — the key does not
-// exist yet, and when it does it never leaves this device and the card.
+// Nothing secret crosses here. The wallet key does not exist yet, and
+// when it does it never leaves this device and the card; the phone key
+// is public. The card is told to let only a session opened with the
+// phone's key — which needs that phone's Secure Enclave and Face ID —
+// use the wallet key.
 // ============================================================
 #ifndef COLD_TARGET_H
 #define COLD_TARGET_H
@@ -35,10 +38,9 @@ static const uint8_t COLD_AID[] = { 0xF0, 0x74, 0x6F, 0x6C, 0x75, 0x43, 0x4F, 0x
 #define COLD_INS_SETUP          0x20
 #define COLD_INS_CANCEL         0x21
 
-#define COLD_SETUP_VERSION      0x01
-#define COLD_SETUP_HEADER_LEN   10     // version + two object ids + password length
-#define COLD_PASSWORD_MIN       4
-#define COLD_PASSWORD_MAX       16
+#define COLD_SETUP_VERSION      0x02
+#define COLD_PHONE_KEY_LEN      65     // uncompressed NIST P-256 point
+#define COLD_SETUP_LEN          (1 + 4 + 4 + COLD_PHONE_KEY_LEN)
 // Object ids 0x7FFFxxxx are the card's own (NXP reserved).
 #define SE_RESERVED_ID_PREFIX   0x7FFF
 
@@ -54,20 +56,20 @@ static const uint8_t COLD_AID[] = { 0xF0, 0x74, 0x6F, 0x6C, 0x75, 0x43, 0x4F, 0x
 // The app needs two commands. A reader that is still talking after
 // this many is something else.
 #define TARGET_MAX_COMMANDS        12
+// Room for the longest command: a setup APDU (5 + 74) and its Le.
+#define TARGET_APDU_MAX            96
 
-/// The slots and password of a new wallet.
+/// The slots of a new wallet and the phone that will use it.
 struct ColdSetup {
   uint32_t keyId = 0;
-  uint32_t passwordId = 0;
-  uint8_t  password[COLD_PASSWORD_MAX];
-  uint8_t  passwordLen = 0;
+  uint32_t phoneKeyId = 0;
+  uint8_t  phoneKey[COLD_PHONE_KEY_LEN];
   bool     complete = false;
 
   void reset() {
-    coldWipe(password, sizeof(password));
+    coldWipe(phoneKey, sizeof(phoneKey));
     keyId = 0;
-    passwordId = 0;
-    passwordLen = 0;
+    phoneKeyId = 0;
     complete = false;
   }
 };
@@ -97,23 +99,23 @@ static inline int16_t targetReceive(uint8_t* out, uint8_t outSize) {
 /// Reads the setup record out of an APDU body. Rejects anything that
 /// could not be a valid wallet, so a bad tap never reaches the card.
 static inline bool targetParseSetup(const uint8_t* body, uint8_t len, ColdSetup& setup) {
-  if (len < COLD_SETUP_HEADER_LEN || body[0] != COLD_SETUP_VERSION) return false;
-  const uint8_t passwordLen = body[9];
-  if (passwordLen < COLD_PASSWORD_MIN || passwordLen > COLD_PASSWORD_MAX) return false;
-  if (len != COLD_SETUP_HEADER_LEN + passwordLen) return false;
+  if (len != COLD_SETUP_LEN || body[0] != COLD_SETUP_VERSION) return false;
 
   const uint32_t keyId = coldLoadBe32(body + 1);
-  const uint32_t passwordId = coldLoadBe32(body + 5);
+  const uint32_t phoneKeyId = coldLoadBe32(body + 5);
   // Zero is not a usable id, the two must differ, and neither may be
-  // one of the card's own objects.
-  if (keyId == 0 || passwordId == 0 || keyId == passwordId) return false;
-  if ((keyId >> 16) == SE_RESERVED_ID_PREFIX || (passwordId >> 16) == SE_RESERVED_ID_PREFIX) return false;
+  // one of the card's own objects or the slot this device borrows.
+  if (keyId == 0 || phoneKeyId == 0 || keyId == phoneKeyId) return false;
+  if ((keyId >> 16) == SE_RESERVED_ID_PREFIX || (phoneKeyId >> 16) == SE_RESERVED_ID_PREFIX) return false;
+  if (keyId == COLD_TEMP_KEY_ID || phoneKeyId == COLD_TEMP_KEY_ID) return false;
+  // An uncompressed point. Whether it is on P-256 the card checks when
+  // it stores it, and the phone when it uses it.
+  if (body[9] != 0x04) return false;
 
   setup.reset();
   setup.keyId = keyId;
-  setup.passwordId = passwordId;
-  setup.passwordLen = passwordLen;
-  memcpy(setup.password, body + COLD_SETUP_HEADER_LEN, passwordLen);
+  setup.phoneKeyId = phoneKeyId;
+  memcpy(setup.phoneKey, body + 9, COLD_PHONE_KEY_LEN);
   return true;
 }
 
@@ -190,12 +192,11 @@ static inline int targetCheck(ColdTap& tap, uint16_t waitMs) {
   if (n == -2) return 0;        // nobody yet — still armed, still quiet
   if (n < 0) return -1;
 
-  uint8_t apdu[64];
+  uint8_t apdu[TARGET_APDU_MAX];
   for (int command = 0; command < TARGET_MAX_COMMANDS; command++) {
     const int16_t len = targetReceive(apdu, sizeof(apdu));
     if (len < 0 || !targetHandle(apdu, len, tap)) break;
   }
-  coldWipe(apdu, sizeof(apdu));  // it held the password
   return tap.askedForSomething() ? 1 : -1;
 }
 

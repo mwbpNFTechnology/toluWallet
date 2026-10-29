@@ -209,6 +209,43 @@ static inline void coldSha256(const uint8_t* data, size_t len, uint8_t out[32]) 
   coldSha2Final(s, out);
 }
 
+// ── HMAC-SHA256, fed in pieces ───────────────────────────────
+/// RFC 6979 (cold_p256.h) MACs several values back to back, so the
+/// message is given part by part.
+struct ColdHmac256 {
+  ColdSha256 inner;   // state after the ipad block, then the message
+  ColdSha256 outer;   // state after the opad block
+};
+
+static inline void coldHmac256Begin(ColdHmac256& ctx, const uint8_t* key, size_t keyLen) {
+  uint8_t k[64];
+  memset(k, 0, sizeof(k));
+  if (keyLen > 64) coldSha256(key, keyLen, k);     // 32 bytes, the rest stays zero
+  else if (keyLen) memcpy(k, key, keyLen);
+  uint8_t pad[64];
+  for (int i = 0; i < 64; i++) pad[i] = k[i] ^ 0x36;
+  coldSha2Init(ctx.inner);
+  coldSha2Update(ctx.inner, pad, 64);
+  for (int i = 0; i < 64; i++) pad[i] = k[i] ^ 0x5c;
+  coldSha2Init(ctx.outer);
+  coldSha2Update(ctx.outer, pad, 64);
+  coldWipe(k, sizeof(k));
+  coldWipe(pad, sizeof(pad));
+}
+
+static inline void coldHmac256Update(ColdHmac256& ctx, const uint8_t* data, size_t len) {
+  coldSha2Update(ctx.inner, data, len);
+}
+
+/// The 32-byte MAC. Wipes the context.
+static inline void coldHmac256End(ColdHmac256& ctx, uint8_t out[32]) {
+  uint8_t digest[32];
+  coldSha2Final(ctx.inner, digest);
+  coldSha2Update(ctx.outer, digest, 32);
+  coldSha2Final(ctx.outer, out);
+  coldWipe(digest, sizeof(digest));
+}
+
 // ── HMAC-SHA512 ──────────────────────────────────────────────
 /// A keyed HMAC whose padded-key blocks are hashed once and reused —
 /// PBKDF2 runs it thousands of times with the same key.

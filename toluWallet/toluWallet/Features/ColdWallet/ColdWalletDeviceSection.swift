@@ -79,7 +79,7 @@ struct ColdWalletDeviceSection: View {
         switch model.step {
         case .send: return "the device should be showing its start screen."
         case .scan: return "this can take a few minutes. the app may lock meanwhile — your details are kept."
-        case .check: return "one tap opens the password session and reads the card's address."
+        case .check: return "face id, then one tap: this iphone opens its encrypted session and reads the card's address."
         }
     }
 

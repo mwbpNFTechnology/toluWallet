@@ -2,8 +2,8 @@
 //  CreateWalletView.swift
 //  toluWallet
 //
-//  Create a wallet: name it, pick the tag slots and a password, then tap the
-//  tag. Laid out like toluTag's create-key screen. A wallet made from a seed
+//  Create a wallet: name it, pick the tag slots, then Face ID and a tap of
+//  the tag. Laid out like toluTag's create-key screen. A wallet made from a seed
 //  phrase shows its words, and checks them, between the taps.
 //
 
